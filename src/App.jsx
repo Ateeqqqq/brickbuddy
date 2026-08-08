@@ -1,0 +1,31 @@
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import Home from './pages/Home';
+import Shop from './pages/Shop';
+import Services from './pages/Services';
+import About from './pages/About';
+
+function ScrollToTop() {
+  const { pathname } = window.location;
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
+export default function App() {
+  return (
+    <div className="app">
+      <Navbar cartCount={3} />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/shop" element={<Shop />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/about" element={<About />} />
+      </Routes>
+      <Footer />
+    </div>
+  );
+}

@@ -1,0 +1,218 @@
+.footer { background: var(--bb-black); color: var(--bb-white); }
+
+.footer-cta-strip {
+  background: var(--bb-gray-900);
+  border-top: 3px solid var(--bb-amber);
+  padding: 20px 0;
+}
+
+.footer-strip-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.strip-badges {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.strip-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.strip-badge span:first-child { font-size: 22px; }
+
+.strip-badge div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.strip-badge strong {
+  color: var(--bb-white);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.strip-badge span:last-child {
+  color: var(--bb-gray-300);
+  font-size: 11px;
+}
+
+.strip-supplier {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: rgba(245,168,0,0.1);
+  border: 1px solid rgba(245,168,0,0.3);
+  border-radius: var(--radius-lg);
+  padding: 16px 24px;
+}
+
+.strip-supplier strong {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--bb-white);
+}
+
+.strip-supplier p {
+  font-size: 12px;
+  color: var(--bb-gray-300);
+  margin-top: 2px;
+}
+
+/* Main footer */
+.footer-main { padding: 56px 0 40px; }
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr 1fr 1fr 1.2fr;
+  gap: 40px;
+}
+
+.footer-brand {}
+
+.footer-logo {
+  font-family: var(--ff-display);
+  font-size: 26px;
+  font-weight: 900;
+  margin-bottom: 14px;
+}
+
+.footer-logo-brick { color: var(--bb-white); }
+.footer-logo-buddy { color: var(--bb-amber); }
+
+.footer-desc {
+  font-size: 13px;
+  color: var(--bb-gray-300);
+  line-height: 1.7;
+  max-width: 260px;
+  margin-bottom: 20px;
+}
+
+.footer-socials {
+  display: flex;
+  gap: 8px;
+}
+
+.social-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  color: var(--bb-white);
+  border: 1px solid rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.social-btn:hover { background: var(--bb-amber); color: var(--bb-black); }
+
+.footer-col h4 {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--bb-amber);
+  margin-bottom: 16px;
+}
+
+.footer-col ul li {
+  margin-bottom: 8px;
+}
+
+.footer-col ul li a {
+  font-size: 13px;
+  color: var(--bb-gray-300);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-col ul li a:hover { color: var(--bb-amber); }
+
+.footer-contact p {
+  font-size: 13px;
+  color: var(--bb-gray-300);
+  margin-bottom: 8px;
+}
+
+.footer-apps {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.app-btn {
+  background: rgba(255,255,255,0.08);
+  color: var(--bb-white);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--ff-body);
+  transition: background 0.2s;
+}
+
+.app-btn:hover { background: rgba(245,168,0,0.2); }
+
+/* Footer bottom */
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 16px 0;
+}
+
+.footer-bottom-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.footer-bottom p {
+  font-size: 12px;
+  color: var(--bb-gray-500);
+}
+
+.payment-logos {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.payment-logos span {
+  background: rgba(255,255,255,0.08);
+  color: var(--bb-gray-300);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+@media (max-width: 1100px) {
+  .footer-grid { grid-template-columns: 1fr 1fr 1fr; gap: 32px; }
+  .footer-brand { grid-column: 1 / -1; }
+}
+
+@media (max-width: 640px) {
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .strip-badges { gap: 16px; }
+  .strip-supplier { flex-direction: column; align-items: flex-start; }
+}
