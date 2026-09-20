@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, Search, MapPin, Truck, Menu, X, ChevronDown } from 'lucide-react';
+import { categories, marketplaceLocations, products, vendors } from '../data/products';
 import './Navbar.css';
 
 export default function Navbar({ cartCount = 3 }) {
@@ -8,6 +9,48 @@ export default function Navbar({ cartCount = 3 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
+  const navigate = useNavigate();
+  const selectedLocation = new URLSearchParams(location.search).get('location') || marketplaceLocations[0];
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+
+  const searchResults = useMemo(() => {
+    if (normalizedQuery.length < 2) return [];
+
+    const productResults = products
+      .filter((product) => {
+        const category = categories.find((entry) => entry.id === product.category);
+        const searchableText = [
+          product.name,
+          product.brand,
+          product.supplier,
+          product.location,
+          category?.name,
+          ...(product.vendorOffers || []).flatMap((offer) => [offer.location, offer.supplier]),
+        ].filter(Boolean).join(' ').toLowerCase();
+        return searchableText.includes(normalizedQuery);
+      })
+      .map((product) => ({ type: 'Product', id: product.id, name: product.name, meta: product.brand || product.category }));
+
+    const vendorResults = vendors
+      .filter((vendor) => [vendor.name, vendor.brand, vendor.location, vendor.city, vendor.state]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+        .includes(normalizedQuery))
+      .map((vendor) => ({ type: 'Vendor', id: vendor.id, name: vendor.name, meta: vendor.location }));
+
+    return [...productResults, ...vendorResults].slice(0, 8);
+  }, [normalizedQuery]);
+
+  const handleSearchSubmit = (event) => {
+    event.preventDefault();
+    if (normalizedQuery) navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+  };
+
+  const selectSearchResult = (result) => {
+    setSearchQuery('');
+    navigate(result.type === 'Product' ? `/shop/${result.id}` : `/vendor/${result.id}`);
+  };
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 10);
@@ -46,15 +89,26 @@ export default function Navbar({ cartCount = 3 }) {
                   <span className="logo-tagline">Building Better Together</span>
                 </div>
               </Link>
-              <div className="location-chip">
+              <label className="location-chip">
                 <MapPin size={13} color="#F5A800" />
-                <span className="location-label">Deliver to</span>
-                <span className="location-city">Hyderabad, TS</span>
+                <span className="location-label">Near you</span>
+                <select
+                  className="location-select"
+                  value={selectedLocation}
+                  onChange={(event) => {
+                    window.location.href = `/shop?location=${encodeURIComponent(event.target.value)}`;
+                  }}
+                  aria-label="Select marketplace location"
+                >
+                  {marketplaceLocations.map((availableLocation) => (
+                    <option key={availableLocation} value={availableLocation}>{availableLocation}</option>
+                  ))}
+                </select>
                 <ChevronDown size={12} />
-              </div>
+              </label>
             </div>
 
-            <div className="search-bar">
+            <form className="search-bar" onSubmit={handleSearchSubmit}>
               <select className="search-cat">
                 <option>All Categories</option>
                 <option>Bricks & Blocks</option>
@@ -72,10 +126,30 @@ export default function Navbar({ cartCount = 3 }) {
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
               />
-              <button className="search-btn" aria-label="Search">
+              <button type="submit" className="search-btn" aria-label="Search">
                 <Search size={18} />
               </button>
-            </div>
+              {normalizedQuery.length >= 2 && (
+                <div className="search-results" role="listbox">
+                  {searchResults.length > 0 ? searchResults.map((result) => (
+                    <button
+                      type="button"
+                      className="search-result"
+                      key={`${result.type}-${result.id}`}
+                      onClick={() => selectSearchResult(result)}
+                    >
+                      <span className="search-result-type">{result.type}</span>
+                      <span className="search-result-content">
+                        <strong>{result.name}</strong>
+                        <small>{result.meta}</small>
+                      </span>
+                    </button>
+                  )) : (
+                    <div className="search-no-results">No products or vendors found</div>
+                  )}
+                </div>
+              )}
+            </form>
 
             <div className="topbar-actions">
               <Link to="#" className="action-item">

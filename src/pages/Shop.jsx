@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Search, SlidersHorizontal, X, ChevronDown, ChevronUp, Grid3X3, List } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Search, SlidersHorizontal, X, ChevronDown, ChevronUp, Grid3X3, List, MapPin } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
-import { products, categories } from '../data/products';
+import { products, categories, marketplaceLocations, vendors } from '../data/products';
 import './Shop.css';
 
 const priceRanges = [
@@ -22,7 +22,8 @@ const sortOptions = [
 ];
 
 const brands = ['UltraTech', 'ACC', 'SAIL', 'Vizag Steel', 'Berger', 'Asian Paints', 'Kajaria', 'Dr. Fixit', 'Prince Pipes', 'Stanley', 'Anchor', 'StoneAge'];
-const locations = ['Hyderabad', 'Vijayawada', 'Visakhapatnam', 'Bangalore', 'Chennai', 'Kurnool'];
+const locations = marketplaceLocations;
+const ratingOptions = [4.5, 4.0, 3.5, 3.0];
 
 function FilterAccordion({ title, children, defaultOpen = true }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -38,16 +39,23 @@ function FilterAccordion({ title, children, defaultOpen = true }) {
 }
 
 export default function Shop() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialCat = searchParams.get('cat') || '';
+  const initialSubcategory = searchParams.get('subcat') || '';
+  const initialLocation = searchParams.get('location') || '';
+  const initialSearch = searchParams.get('search') || '';
 
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch);
   const [selectedCats, setSelectedCats] = useState(initialCat ? [initialCat] : []);
+  const [selectedSubcategory, setSelectedSubcategory] = useState(initialSubcategory);
   const [selectedBrands, setSelectedBrands] = useState([]);
-  const [selectedLocations, setSelectedLocations] = useState([]);
+  const [selectedLocations, setSelectedLocations] = useState(initialLocation ? [initialLocation] : []);
+  const [selectedVendors, setSelectedVendors] = useState([]);
   const [priceRange, setPriceRange] = useState(null);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [onSaleOnly, setOnSaleOnly] = useState(false);
+  const [minimumRating, setMinimumRating] = useState(null);
   const [sort, setSort] = useState('featured');
   const [view, setView] = useState('grid');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -56,28 +64,103 @@ export default function Shop() {
     setArr(arr.includes(item) ? arr.filter(i => i !== item) : [...arr, item]);
   };
 
+  const updateCategoryUrl = (categoryId = '', subcategoryId = '') => {
+    const nextParams = new URLSearchParams(searchParams);
+    if (categoryId) nextParams.set('cat', categoryId);
+    else nextParams.delete('cat');
+    if (subcategoryId) nextParams.set('subcat', subcategoryId);
+    else nextParams.delete('subcat');
+    setSearchParams(nextParams);
+  };
+
+  const selectCategory = (categoryId) => {
+    const isSelected = selectedCats.length === 1 && selectedCats[0] === categoryId && !selectedSubcategory;
+    const nextCategory = isSelected ? '' : categoryId;
+    setSelectedCats(nextCategory ? [nextCategory] : []);
+    setSelectedSubcategory('');
+    updateCategoryUrl(nextCategory);
+  };
+
+  const selectSubcategory = (categoryId, subcategoryId) => {
+    const isSelected = selectedSubcategory === subcategoryId;
+    const nextSubcategory = isSelected ? '' : subcategoryId;
+    setSelectedCats(nextSubcategory ? [categoryId] : []);
+    setSelectedSubcategory(nextSubcategory);
+    updateCategoryUrl(categoryId, nextSubcategory);
+  };
+
+  const clearCategorySelection = () => {
+    setSelectedCats([]);
+    setSelectedSubcategory('');
+    updateCategoryUrl();
+  };
+
   const clearFilters = () => {
     setSelectedCats([]);
+    setSelectedSubcategory('');
     setSelectedBrands([]);
     setSelectedLocations([]);
+    setSelectedVendors([]);
     setPriceRange(null);
     setInStockOnly(false);
     setOnSaleOnly(false);
+    setMinimumRating(null);
     setSearch('');
+    updateCategoryUrl();
   };
 
-  const activeFilterCount = selectedCats.length + selectedBrands.length + selectedLocations.length
-    + (priceRange ? 1 : 0) + (inStockOnly ? 1 : 0) + (onSaleOnly ? 1 : 0);
+  const activeFilterCount = selectedCats.length + (selectedSubcategory ? 1 : 0) + selectedBrands.length + selectedLocations.length + selectedVendors.length
+    + (priceRange ? 1 : 0) + (inStockOnly ? 1 : 0) + (onSaleOnly ? 1 : 0) + (minimumRating ? 1 : 0);
 
   const filtered = useMemo(() => {
     let result = [...products];
     if (search) result = result.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.supplier.toLowerCase().includes(search.toLowerCase()));
-    if (selectedCats.length) result = result.filter(p => selectedCats.includes(p.category));
-    if (selectedBrands.length) result = result.filter(p => selectedBrands.includes(p.brand));
-    if (selectedLocations.length) result = result.filter(p => selectedLocations.includes(p.location));
-    if (priceRange) result = result.filter(p => p.price >= priceRange.min && p.price <= priceRange.max);
-    if (inStockOnly) result = result.filter(p => p.inStock);
-    if (onSaleOnly) result = result.filter(p => p.badge === 'sale');
+    if (selectedSubcategory) {
+      result = result.filter(p => p.subcategoryId === selectedSubcategory);
+    } else if (selectedCats.length) {
+      result = result.filter(p => selectedCats.includes(p.category));
+    }
+    if (selectedBrands.length) {
+      result = result.filter((product) => (
+        selectedBrands.includes(product.brand)
+        || product.vendorOffers?.some((offer) => selectedBrands.includes(offer.brand))
+      ));
+    }
+    result = result.filter((product) => {
+      const offers = product.vendorOffers || [];
+      const matchingOffers = offers.filter((offer) => {
+        const locationMatches = !selectedLocations.length || selectedLocations.includes(offer.location);
+        const vendorMatches = !selectedVendors.length || selectedVendors.includes(offer.vendorId);
+        return locationMatches && vendorMatches;
+      });
+      if (!matchingOffers.length) return false;
+      if (priceRange && !matchingOffers.some((offer) => Number(offer.price) >= priceRange.min && Number(offer.price) <= priceRange.max)) return false;
+      if (inStockOnly && !matchingOffers.some((offer) => offer.inStock)) return false;
+      if (onSaleOnly && !matchingOffers.some((offer) => offer.badge === 'sale')) return false;
+      if (minimumRating && Number(product.rating) < minimumRating) return false;
+      return true;
+    }).map((product) => {
+        const regionalOffers = (product.vendorOffers || []).filter((offer) => {
+          const locationMatches = !selectedLocations.length || selectedLocations.includes(offer.location);
+          const vendorMatches = !selectedVendors.length || selectedVendors.includes(offer.vendorId);
+          return locationMatches && vendorMatches;
+        });
+        const lowestOffer = regionalOffers.reduce(
+          (lowest, offer) => Number(offer.price) < Number(lowest.price) ? offer : lowest,
+          regionalOffers[0]
+        );
+        return {
+          ...product,
+          vendorOffers: regionalOffers,
+          supplier: lowestOffer.supplier,
+          location: lowestOffer.location,
+          price: lowestOffer.price,
+          originalPrice: lowestOffer.originalPrice,
+          unit: lowestOffer.unit,
+          inStock: regionalOffers.some((offer) => offer.inStock),
+          badge: lowestOffer.badge,
+        };
+      });
 
     switch(sort) {
       case 'price-asc': result.sort((a,b) => a.price - b.price); break;
@@ -86,7 +169,15 @@ export default function Shop() {
       default: break;
     }
     return result;
-  }, [search, selectedCats, selectedBrands, selectedLocations, priceRange, inStockOnly, onSaleOnly, sort]);
+  }, [search, selectedCats, selectedSubcategory, selectedBrands, selectedLocations, selectedVendors, priceRange, inStockOnly, onSaleOnly, minimumRating, sort]);
+
+  const selectedCategory = categories.find((category) => category.id === selectedCats[0]);
+  const selectedSubcategoryData = selectedCategory?.subcategories?.find(
+    (subcategory) => subcategory.id === selectedSubcategory
+  );
+  const subcategoryProductCount = (subcategoryId) => products.filter(
+    (product) => product.subcategoryId === subcategoryId
+  ).length;
 
   const FilterPanel = () => (
     <div className="filter-panel">
@@ -106,7 +197,7 @@ export default function Shop() {
               <input
                 type="checkbox"
                 checked={selectedCats.includes(cat.id)}
-                onChange={() => toggleItem(selectedCats, setSelectedCats, cat.id)}
+                onChange={() => selectCategory(cat.id)}
               />
               <span>{cat.name}</span>
               <span className="filter-count">{products.filter(p => p.category === cat.id).length}</span>
@@ -161,6 +252,21 @@ export default function Shop() {
         </div>
       </FilterAccordion>
 
+      <FilterAccordion title="Vendor">
+        <div className="filter-options">
+          {vendors.map(vendor => (
+            <label key={vendor.id} className="filter-checkbox">
+              <input
+                type="checkbox"
+                checked={selectedVendors.includes(vendor.id)}
+                onChange={() => toggleItem(selectedVendors, setSelectedVendors, vendor.id)}
+              />
+              <span>{vendor.name}</span>
+            </label>
+          ))}
+        </div>
+      </FilterAccordion>
+
       <FilterAccordion title="Availability">
         <div className="filter-options">
           <label className="filter-checkbox">
@@ -176,9 +282,14 @@ export default function Shop() {
 
       <FilterAccordion title="Minimum Rating" defaultOpen={false}>
         <div className="filter-options">
-          {[4.5, 4.0, 3.5, 3.0].map(r => (
+          {ratingOptions.map(r => (
             <label key={r} className="filter-radio">
-              <input type="radio" name="rating"/>
+              <input
+                type="radio"
+                name="rating"
+                checked={minimumRating === r}
+                onChange={() => setMinimumRating(minimumRating === r ? null : r)}
+              />
               <span>{'★'.repeat(Math.floor(r))} {r}+ and above</span>
             </label>
           ))}
@@ -194,6 +305,21 @@ export default function Shop() {
         <div className="container">
           <h1 className="shop-title">Shop Construction Materials</h1>
           <p className="shop-subtitle">1,000+ products from verified suppliers across India</p>
+
+          <div className="marketplace-location-control">
+            <MapPin size={15} />
+            <span>Near you</span>
+            <select
+              value={selectedLocations[0] || ''}
+              onChange={(event) => setSelectedLocations(event.target.value ? [event.target.value] : [])}
+              aria-label="Filter marketplace by location"
+            >
+              <option value="">All locations</option>
+              {marketplaceLocations.map((location) => (
+                <option key={location} value={location}>{location}</option>
+              ))}
+            </select>
+          </div>
 
           <div className="shop-search-bar">
             <Search size={18} color="#9CA3AF"/>
@@ -215,12 +341,36 @@ export default function Shop() {
                   <button onClick={() => toggleItem(selectedCats, setSelectedCats, c)}><X size={11}/></button>
                 </span>
               ))}
+              {selectedSubcategory && selectedSubcategoryData && (
+                <span className="filter-pill">
+                  {selectedSubcategoryData.name}
+                  <button onClick={() => selectSubcategory(selectedCategory.id, selectedSubcategory)}><X size={11}/></button>
+                </span>
+              )}
               {selectedBrands.map(b => (
                 <span key={b} className="filter-pill">
                   {b}
                   <button onClick={() => toggleItem(selectedBrands, setSelectedBrands, b)}><X size={11}/></button>
                 </span>
               ))}
+              {selectedLocations.map(location => (
+                <span key={location} className="filter-pill">
+                  Near {location}
+                  <button onClick={() => setSelectedLocations([])}><X size={11}/></button>
+                </span>
+              ))}
+              {selectedVendors.map(vendorId => (
+                <span key={vendorId} className="filter-pill">
+                  {vendors.find(vendor => vendor.id === vendorId)?.name}
+                  <button onClick={() => toggleItem(selectedVendors, setSelectedVendors, vendorId)}><X size={11}/></button>
+                </span>
+              ))}
+              {minimumRating && (
+                <span className="filter-pill">
+                  {minimumRating}+ rating
+                  <button onClick={() => setMinimumRating(null)}><X size={11}/></button>
+                </span>
+              )}
               {priceRange && (
                 <span className="filter-pill">
                   {priceRange.label}
@@ -243,6 +393,26 @@ export default function Shop() {
 
         {/* Product area */}
         <main className="products-area">
+          {(selectedCategory || selectedSubcategory) && (
+            <nav className="marketplace-breadcrumb" aria-label="Marketplace breadcrumb">
+              <button type="button" onClick={clearCategorySelection}>All Categories</button>
+              <span>→</span>
+              {selectedCategory && (
+                <>
+                  <button type="button" onClick={() => selectCategory(selectedCategory.id)}>
+                    {selectedCategory.name}
+                  </button>
+                  {selectedSubcategoryData && (
+                    <>
+                      <span>→</span>
+                      <span className="current">{selectedSubcategoryData.name}</span>
+                    </>
+                  )}
+                </>
+              )}
+            </nav>
+          )}
+
           {/* Toolbar */}
           <div className="products-toolbar">
             <div className="results-count">
@@ -272,22 +442,65 @@ export default function Shop() {
             </div>
           </div>
 
-          {/* Category quick-filter pills */}
-          <div className="cat-pills">
+          {/* Category discovery */}
+          <section className="category-discovery" aria-labelledby="category-discovery-title">
+            <div className="category-discovery-header">
+              <div>
+                <p className="section-label">Browse materials</p>
+                <h2 id="category-discovery-title">Construction categories</h2>
+              </div>
+              <span className="category-discovery-count">{categories.length} categories</span>
+            </div>
+            <div className="cat-pills">
             <button
               className={`cat-pill ${selectedCats.length === 0 ? 'active' : ''}`}
-              onClick={() => setSelectedCats([])}
-            >All</button>
-            {categories.map(cat => (
-              <button
-                key={cat.id}
-                className={`cat-pill ${selectedCats.includes(cat.id) ? 'active' : ''}`}
-                onClick={() => toggleItem(selectedCats, setSelectedCats, cat.id)}
-              >
-                {cat.icon || ''} {cat.name}
-              </button>
-            ))}
-          </div>
+              onClick={clearCategorySelection}
+            >
+              <span className="cat-pill-icon" aria-hidden="true">▦</span>
+              <span>All materials</span>
+            </button>
+            {categories.map(cat => {
+              const productCount = cat.count ?? products.filter(product => product.category === cat.id).length;
+              return (
+                <button
+                  key={cat.id}
+                  className={`cat-pill ${selectedCats.includes(cat.id) ? 'active' : ''}`}
+                  onClick={() => selectCategory(cat.id)}
+                >
+                  <span className="cat-pill-icon" aria-hidden="true">{cat.icon || '•'}</span>
+                  <span className="cat-pill-content">
+                    <span>{cat.name}</span>
+                    <small>{productCount} products</small>
+                  </span>
+                </button>
+              );
+            })}
+            </div>
+            {selectedCategory?.subcategories?.length > 0 && (
+              <div className="subcategory-discovery">
+                <div className="subcategory-heading">
+                  <span>{selectedCategory.name} subcategories</span>
+                  {selectedSubcategory && (
+                    <button type="button" onClick={() => selectCategory(selectedCategory.id)}>
+                      View all {selectedCategory.name}
+                    </button>
+                  )}
+                </div>
+                <div className="subcategory-pills">
+                  {selectedCategory.subcategories.map((subcategory) => (
+                    <button
+                      key={subcategory.id}
+                      className={`subcategory-pill ${selectedSubcategory === subcategory.id ? 'active' : ''}`}
+                      onClick={() => selectSubcategory(selectedCategory.id, subcategory.id)}
+                    >
+                      <span>{subcategory.name}</span>
+                      <small>{subcategoryProductCount(subcategory.id)} products</small>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
 
           {/* Products grid */}
           {filtered.length === 0 ? (
@@ -300,7 +513,12 @@ export default function Shop() {
           ) : (
             <div className={`products-grid ${view}`}>
               {filtered.map(p => (
-                <ProductCard key={p.id} product={p} compact={view === 'list'}/>
+                <ProductCard
+                  key={p.id}
+                  product={p}
+                  compact={view === 'list'}
+                  onClick={() => navigate(`/shop/${p.id}`)}
+                />
               ))}
             </div>
           )}

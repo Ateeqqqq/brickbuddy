@@ -1,19 +1,283 @@
 export const categories = [
-  { id: 'bricks', name: 'Bricks & Blocks', icon: '🧱', count: 120 },
-  { id: 'cement', name: 'Cement', icon: '🪣', count: 85 },
-  { id: 'steel', name: 'Steel & TMT', icon: '🔩', count: 150 },
-  { id: 'sand', name: 'Sand & Aggregates', icon: '⛏️', count: 60 },
-  { id: 'plumbing', name: 'Plumbing', icon: '🚿', count: 95 },
-  { id: 'electrical', name: 'Electrical', icon: '⚡', count: 120 },
-  { id: 'hardware', name: 'Hardware & Tools', icon: '🔨', count: 200 },
-  { id: 'paints', name: 'Paints & Chemicals', icon: '🎨', count: 80 },
-  { id: 'tiles', name: 'Tiles & Flooring', icon: '🟫', count: 110 },
-  { id: 'wood', name: 'Wood & Timber', icon: '🪵', count: 70 },
-  { id: 'waterproofing', name: 'Waterproofing', icon: '💧', count: 45 },
-  { id: 'safety', name: 'Safety Equipment', icon: '🦺', count: 55 },
+  {
+    id: 'bricks',
+    name: 'Bricks & Blocks',
+    icon: '🧱',
+    count: 120,
+    parentId: null,
+    subcategories: [
+      { id: 'clay-bricks', name: 'Clay Bricks', parentId: 'bricks' },
+      { id: 'concrete-blocks', name: 'Concrete Blocks', parentId: 'bricks' },
+      { id: 'aac-blocks', name: 'AAC Blocks', parentId: 'bricks' },
+    ],
+  },
+  {
+    id: 'cement',
+    name: 'Cement',
+    icon: '🪣',
+    count: 85,
+    parentId: null,
+    subcategories: [
+      { id: 'opc-cement', name: 'OPC Cement', parentId: 'cement' },
+      { id: 'ppc-cement', name: 'PPC Cement', parentId: 'cement' },
+      { id: 'psc-cement', name: 'PSC Cement', parentId: 'cement' },
+    ],
+  },
+  {
+    id: 'steel',
+    name: 'Steel & TMT',
+    icon: '🔩',
+    count: 150,
+    parentId: null,
+    subcategories: [
+      { id: 'tmt-bars', name: 'TMT Bars', parentId: 'steel' },
+      { id: 'structural-steel', name: 'Structural Steel', parentId: 'steel' },
+      { id: 'steel-sheets', name: 'Steel Sheets', parentId: 'steel' },
+    ],
+  },
+  {
+    id: 'sand',
+    name: 'Sand & Aggregates',
+    icon: '⛏️',
+    count: 60,
+    parentId: null,
+    subcategories: [
+      { id: 'river-sand', name: 'River Sand', parentId: 'sand' },
+      { id: 'm-sand', name: 'M-Sand', parentId: 'sand' },
+      { id: 'aggregates', name: 'Aggregates', parentId: 'sand' },
+    ],
+  },
+  {
+    id: 'plumbing',
+    name: 'Plumbing & Sanitary',
+    icon: '🚿',
+    count: 95,
+    parentId: null,
+    subcategories: [
+      { id: 'pipes', name: 'Pipes', parentId: 'plumbing' },
+      { id: 'cpvc-pipes', name: 'CPVC Pipes', parentId: 'plumbing' },
+      { id: 'bathroom-fittings', name: 'Bathroom Fittings', parentId: 'plumbing' },
+      { id: 'sanitaryware', name: 'Sanitaryware', parentId: 'plumbing' },
+    ],
+  },
+  {
+    id: 'electrical',
+    name: 'Electrical',
+    icon: '⚡',
+    count: 120,
+    parentId: null,
+    subcategories: [
+      { id: 'wires-cables', name: 'Wires & Cables', parentId: 'electrical' },
+      { id: 'switches', name: 'Switches', parentId: 'electrical' },
+      { id: 'mcbs', name: 'MCBs', parentId: 'electrical' },
+      { id: 'lighting', name: 'Lighting', parentId: 'electrical' },
+    ],
+  },
+  {
+    id: 'hardware',
+    name: 'Hardware & Tools',
+    icon: '🔨',
+    count: 200,
+    parentId: null,
+    subcategories: [
+      { id: 'fasteners', name: 'Fasteners', parentId: 'hardware' },
+      { id: 'nuts-bolts', name: 'Nuts & Bolts', parentId: 'hardware' },
+      { id: 'tools', name: 'Tools', parentId: 'hardware' },
+      { id: 'door-hardware', name: 'Door Hardware', parentId: 'hardware' },
+    ],
+  },
+  {
+    id: 'paints',
+    name: 'Paints & Finishes',
+    icon: '🎨',
+    count: 80,
+    parentId: null,
+    subcategories: [
+      { id: 'interior-paint', name: 'Interior Paint', parentId: 'paints' },
+      { id: 'exterior-paint', name: 'Exterior Paint', parentId: 'paints' },
+      { id: 'primers', name: 'Primers', parentId: 'paints' },
+      { id: 'putty', name: 'Putty', parentId: 'paints' },
+    ],
+  },
+  {
+    id: 'tiles',
+    name: 'Tiles & Flooring',
+    icon: '🟫',
+    count: 110,
+    parentId: null,
+    subcategories: [
+      { id: 'floor-tiles', name: 'Floor Tiles', parentId: 'tiles' },
+      { id: 'wall-tiles', name: 'Wall Tiles', parentId: 'tiles' },
+      { id: 'vitrified-tiles', name: 'Vitrified Tiles', parentId: 'tiles' },
+      { id: 'porcelain-tiles', name: 'Porcelain Tiles', parentId: 'tiles' },
+    ],
+  },
+  {
+    id: 'wood',
+    name: 'Wood & Timber',
+    icon: '🪵',
+    count: 70,
+    parentId: null,
+    subcategories: [
+      { id: 'plywood', name: 'Plywood', parentId: 'wood' },
+      { id: 'timber', name: 'Timber', parentId: 'wood' },
+      { id: 'laminates', name: 'Laminates', parentId: 'wood' },
+    ],
+  },
+  {
+    id: 'waterproofing',
+    name: 'Waterproofing',
+    icon: '💧',
+    count: 45,
+    parentId: null,
+    subcategories: [
+      { id: 'waterproofing-coatings', name: 'Waterproofing Coatings', parentId: 'waterproofing' },
+      { id: 'waterproofing-membranes', name: 'Waterproofing Membranes', parentId: 'waterproofing' },
+    ],
+  },
+  {
+    id: 'safety',
+    name: 'Safety Equipment',
+    icon: '🦺',
+    count: 55,
+    parentId: null,
+    subcategories: [
+      { id: 'safety-helmets', name: 'Safety Helmets', parentId: 'safety' },
+      { id: 'safety-shoes', name: 'Safety Shoes', parentId: 'safety' },
+      { id: 'protective-wear', name: 'Protective Wear', parentId: 'safety' },
+    ],
+  },
+  {
+    id: 'marble-granite',
+    name: 'Marble & Granite',
+    icon: '⬛',
+    count: 75,
+    parentId: null,
+    subcategories: [
+      { id: 'marble-slabs', name: 'Marble Slabs', parentId: 'marble-granite' },
+      { id: 'granite-slabs', name: 'Granite Slabs', parentId: 'marble-granite' },
+      { id: 'stone-countertops', name: 'Stone Countertops', parentId: 'marble-granite' },
+    ],
+  },
+  {
+    id: 'roofing',
+    name: 'Roofing',
+    icon: '🏠',
+    count: 65,
+    parentId: null,
+    subcategories: [
+      { id: 'roofing-sheets', name: 'Roofing Sheets', parentId: 'roofing' },
+      { id: 'roofing-tiles', name: 'Roofing Tiles', parentId: 'roofing' },
+      { id: 'roofing-accessories', name: 'Roofing Accessories', parentId: 'roofing' },
+    ],
+  },
+  {
+    id: 'construction-chemicals',
+    name: 'Construction Chemicals',
+    icon: '🧪',
+    count: 70,
+    parentId: null,
+    subcategories: [
+      { id: 'adhesives', name: 'Adhesives', parentId: 'construction-chemicals' },
+      { id: 'concrete-admixtures', name: 'Concrete Admixtures', parentId: 'construction-chemicals' },
+      { id: 'repair-compounds', name: 'Repair Compounds', parentId: 'construction-chemicals' },
+    ],
+  },
+  {
+    id: 'ready-mix-concrete',
+    name: 'Ready Mix Concrete',
+    icon: '🚧',
+    count: 35,
+    parentId: null,
+    subcategories: [
+      { id: 'rcc-concrete', name: 'RCC Concrete', parentId: 'ready-mix-concrete' },
+      { id: 'pcc-concrete', name: 'PCC Concrete', parentId: 'ready-mix-concrete' },
+    ],
+  },
+  {
+    id: 'construction-machinery',
+    name: 'Construction Machinery',
+    icon: '🚜',
+    count: 40,
+    parentId: null,
+    subcategories: [
+      { id: 'mixers', name: 'Concrete Mixers', parentId: 'construction-machinery' },
+      { id: 'compactors', name: 'Compactors', parentId: 'construction-machinery' },
+      { id: 'lifting-equipment', name: 'Lifting Equipment', parentId: 'construction-machinery' },
+    ],
+  },
 ];
 
-export const products = [
+// `categories` remains the backwards-compatible main-category collection used by Shop and Navbar.
+export const categoryHierarchy = categories;
+
+const productSubcategoryById = {
+  1: 'ppc-cement',
+  2: 'tmt-bars',
+  3: 'clay-bricks',
+  4: 'aac-blocks',
+  5: 'aggregates',
+  6: 'opc-cement',
+  7: 'tmt-bars',
+  8: 'river-sand',
+  9: 'exterior-paint',
+  10: 'interior-paint',
+  11: 'cpvc-pipes',
+  12: 'vitrified-tiles',
+  13: 'granite-slabs',
+  14: 'switches',
+  15: 'tools',
+  16: 'waterproofing-coatings',
+};
+
+export const vendors = [
+  { id: 'vendor-ultratech', name: 'UltraTech Ltd', brand: 'UltraTech', location: 'Hyderabad', city: 'Hyderabad', state: 'Telangana', rating: 4.8, verified: true, leadTime: '2-4 days' },
+  { id: 'vendor-sail', name: 'SAIL Distributors', brand: 'SAIL', location: 'Hyderabad', city: 'Hyderabad', state: 'Telangana', rating: 4.7, verified: true, leadTime: '3-5 days' },
+  { id: 'vendor-brick-king', name: 'Brick King Suppliers', brand: 'LocalBrick', location: 'Vijayawada', city: 'Vijayawada', state: 'Andhra Pradesh', rating: 4.6, verified: true, leadTime: '1-3 days' },
+  { id: 'vendor-buildblock', name: 'BuildBlock Co.', brand: 'BuildBlock', location: 'Hyderabad', city: 'Hyderabad', state: 'Telangana', rating: 4.5, verified: true, leadTime: '2-4 days' },
+  { id: 'vendor-granite-king', name: 'GraniteKing Materials', brand: 'GraniteKing', location: 'Bangalore', city: 'Bangalore', state: 'Karnataka', rating: 4.8, verified: true, leadTime: '4-6 days' },
+  { id: 'vendor-acc', name: 'ACC Distributors', brand: 'ACC', location: 'Chennai', city: 'Chennai', state: 'Tamil Nadu', rating: 4.6, verified: true, leadTime: '3-5 days' },
+  { id: 'vendor-vizag-steel', name: 'Vizag Steel Point', brand: 'Vizag Steel', location: 'Visakhapatnam', city: 'Visakhapatnam', state: 'Andhra Pradesh', rating: 4.5, verified: true, leadTime: '2-4 days' },
+  { id: 'vendor-sandy-supplies', name: 'Sandy Supplies', brand: 'SandySupply', location: 'Hyderabad', city: 'Hyderabad', state: 'Telangana', rating: 4.4, verified: true, leadTime: '2-5 days' },
+  { id: 'vendor-berger', name: 'Berger Paints Depot', brand: 'Berger', location: 'Hyderabad', city: 'Hyderabad', state: 'Telangana', rating: 4.7, verified: true, leadTime: '2-3 days' },
+  { id: 'vendor-asian-paints', name: 'Asian Paints Hub', brand: 'Asian Paints', location: 'Hyderabad', city: 'Hyderabad', state: 'Telangana', rating: 4.8, verified: true, leadTime: '2-4 days' },
+  { id: 'vendor-prince-pipes', name: 'Prince Pipes Depot', brand: 'Prince Pipes', location: 'Hyderabad', city: 'Hyderabad', state: 'Telangana', rating: 4.4, verified: true, leadTime: '2-3 days' },
+  { id: 'vendor-tileworld', name: 'TileWorld Showroom', brand: 'Kajaria', location: 'Hyderabad', city: 'Hyderabad', state: 'Telangana', rating: 4.6, verified: true, leadTime: '3-5 days' },
+  { id: 'vendor-stoneage', name: 'StoneAge Gallery', brand: 'StoneAge', location: 'Kurnool', city: 'Kurnool', state: 'Andhra Pradesh', rating: 4.9, verified: true, leadTime: '4-6 days' },
+  { id: 'vendor-electrical-zone', name: 'Electrical Zone', brand: 'Anchor', location: 'Hyderabad', city: 'Hyderabad', state: 'Telangana', rating: 4.7, verified: true, leadTime: '2-4 days' },
+  { id: 'vendor-toolmart', name: 'ToolMart Pro', brand: 'Stanley', location: 'Hyderabad', city: 'Hyderabad', state: 'Telangana', rating: 4.5, verified: true, leadTime: '1-3 days' },
+  { id: 'vendor-pidilite', name: 'Pidilite Distributors', brand: 'Dr. Fixit', location: 'Hyderabad', city: 'Hyderabad', state: 'Telangana', rating: 4.8, verified: true, leadTime: '3-5 days' },
+  { id: 'vendor-buildmax', name: 'BuildMax Materials', brand: 'BuildMax', location: 'Hyderabad', city: 'Hyderabad', state: 'Telangana', rating: 4.4, verified: true, leadTime: '2-4 days' },
+  { id: 'vendor-raj-cement', name: 'Raj Cement Depot', brand: 'RajCement', location: 'Hyderabad', city: 'Hyderabad', state: 'Telangana', rating: 4.5, verified: true, leadTime: '2-4 days' },
+];
+
+export const marketplaceLocations = [...new Set(vendors.map((vendor) => vendor.location))];
+
+export const vendorOffers = [
+  { id: 'offer-1', productId: 1, vendorId: 'vendor-ultratech', supplier: 'UltraTech Ltd', brand: 'UltraTech', location: 'Hyderabad', price: 420, originalPrice: 450, unit: 'bag', inStock: true, badge: 'sale' },
+  { id: 'offer-1-alt', productId: 1, vendorId: 'vendor-buildmax', supplier: 'BuildMax Materials', brand: 'BuildMax', location: 'Hyderabad', price: 435, originalPrice: 470, unit: 'bag', inStock: true, badge: 'new' },
+  { id: 'offer-2', productId: 2, vendorId: 'vendor-sail', supplier: 'SAIL Distributors', brand: 'SAIL', location: 'Hyderabad', price: 58, originalPrice: 62, unit: 'kg', inStock: true, badge: 'sale' },
+  { id: 'offer-2-alt', productId: 2, vendorId: 'vendor-vizag-steel', supplier: 'Vizag Steel Point', brand: 'Vizag Steel', location: 'Visakhapatnam', price: 56, originalPrice: 60, unit: 'kg', inStock: true, badge: 'new' },
+  { id: 'offer-3', productId: 3, vendorId: 'vendor-brick-king', supplier: 'Brick King Suppliers', brand: 'LocalBrick', location: 'Vijayawada', price: 7.50, originalPrice: null, unit: 'piece', inStock: true, badge: null },
+  { id: 'offer-3-alt', productId: 3, vendorId: 'vendor-buildmax', supplier: 'BuildMax Materials', brand: 'BuildMax', location: 'Hyderabad', price: 7.80, originalPrice: null, unit: 'piece', inStock: true, badge: null },
+  { id: 'offer-4', productId: 4, vendorId: 'vendor-buildblock', supplier: 'BuildBlock Co.', brand: 'BuildBlock', location: 'Hyderabad', price: 32, originalPrice: null, unit: 'piece', inStock: true, badge: 'new' },
+  { id: 'offer-5', productId: 5, vendorId: 'vendor-granite-king', supplier: 'GraniteKing Materials', brand: 'GraniteKing', location: 'Bangalore', price: 1250, originalPrice: null, unit: 'ton', inStock: true, badge: null },
+  { id: 'offer-6', productId: 6, vendorId: 'vendor-acc', supplier: 'ACC Distributors', brand: 'ACC', location: 'Chennai', price: 480, originalPrice: 510, unit: 'bag', inStock: true, badge: 'sale' },
+  { id: 'offer-7', productId: 7, vendorId: 'vendor-vizag-steel', supplier: 'Vizag Steel Point', brand: 'Vizag Steel', location: 'Visakhapatnam', price: 55, originalPrice: null, unit: 'kg', inStock: true, badge: null },
+  { id: 'offer-8', productId: 8, vendorId: 'vendor-sandy-supplies', supplier: 'Sandy Supplies', brand: 'SandySupply', location: 'Hyderabad', price: 1800, originalPrice: 2000, unit: 'ton', inStock: false, badge: 'sale' },
+  { id: 'offer-9', productId: 9, vendorId: 'vendor-berger', supplier: 'Berger Paints Depot', brand: 'Berger', location: 'Hyderabad', price: 950, originalPrice: 1100, unit: 'litre', inStock: true, badge: 'sale' },
+  { id: 'offer-9-alt', productId: 9, vendorId: 'vendor-asian-paints', supplier: 'Asian Paints Hub', brand: 'Asian Paints', location: 'Hyderabad', price: 930, originalPrice: 1080, unit: 'litre', inStock: true, badge: 'new' },
+  { id: 'offer-10', productId: 10, vendorId: 'vendor-asian-paints', supplier: 'Asian Paints Hub', brand: 'Asian Paints', location: 'Hyderabad', price: 820, originalPrice: null, unit: 'litre', inStock: true, badge: 'new' },
+  { id: 'offer-11', productId: 11, vendorId: 'vendor-prince-pipes', supplier: 'Prince Pipes Depot', brand: 'Prince Pipes', location: 'Hyderabad', price: 85, originalPrice: null, unit: 'metre', inStock: true, badge: null },
+  { id: 'offer-11-alt', productId: 11, vendorId: 'vendor-buildmax', supplier: 'BuildMax Materials', brand: 'BuildMax', location: 'Hyderabad', price: 88, originalPrice: 95, unit: 'metre', inStock: true, badge: 'sale' },
+  { id: 'offer-12', productId: 12, vendorId: 'vendor-tileworld', supplier: 'TileWorld Showroom', brand: 'Kajaria', location: 'Hyderabad', price: 42, originalPrice: 55, unit: 'sqft', inStock: true, badge: 'sale' },
+  { id: 'offer-13', productId: 13, vendorId: 'vendor-stoneage', supplier: 'StoneAge Gallery', brand: 'StoneAge', location: 'Kurnool', price: 280, originalPrice: null, unit: 'sqft', inStock: true, badge: 'new' },
+  { id: 'offer-14', productId: 14, vendorId: 'vendor-electrical-zone', supplier: 'Electrical Zone', brand: 'Anchor', location: 'Hyderabad', price: 350, originalPrice: 420, unit: 'piece', inStock: true, badge: 'sale' },
+  { id: 'offer-15', productId: 15, vendorId: 'vendor-toolmart', supplier: 'ToolMart Pro', brand: 'Stanley', location: 'Hyderabad', price: 280, originalPrice: null, unit: 'piece', inStock: true, badge: null },
+  { id: 'offer-16', productId: 16, vendorId: 'vendor-pidilite', supplier: 'Pidilite Distributors', brand: 'Dr. Fixit', location: 'Hyderabad', price: 1650, originalPrice: 1800, unit: 'unit', inStock: true, badge: 'sale' },
+];
+
+const legacyProducts = [
   {
     id: 1,
     name: 'UltraTech Cement OPC 53 Grade',
@@ -303,6 +567,37 @@ export const products = [
     specs: { coverage: '20-25 sqft/kg', coats: '2', dryingTime: '2-4 hours' }
   },
 ];
+
+export const products = legacyProducts.map((product) => {
+  const offers = vendorOffers.filter((offer) => offer.productId === product.id);
+  const primaryOffer = offers[0] || {
+    supplier: product.supplier,
+    brand: product.brand,
+    location: product.location,
+    price: product.price,
+    originalPrice: product.originalPrice,
+    unit: product.unit,
+    inStock: product.inStock,
+    badge: product.badge,
+    vendorId: 'vendor-default'
+  };
+
+  return {
+    ...product,
+    subcategoryId: productSubcategoryById[product.id] || null,
+    supplier: primaryOffer.supplier || product.supplier,
+    brand: primaryOffer.brand || product.brand,
+    location: primaryOffer.location || product.location,
+    price: primaryOffer.price ?? product.price,
+    originalPrice: primaryOffer.originalPrice ?? product.originalPrice,
+    unit: primaryOffer.unit || product.unit,
+    inStock: primaryOffer.inStock ?? product.inStock,
+    badge: primaryOffer.badge ?? product.badge,
+    vendorId: primaryOffer.vendorId,
+    vendorOfferIds: offers.map((offer) => offer.id),
+    vendorOffers: offers
+  };
+});
 
 export const testimonials = [
   {

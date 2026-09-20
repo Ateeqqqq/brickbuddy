@@ -1,0 +1,130 @@
+.vendor-storefront-page {
+  padding: 32px 0 64px;
+  background: var(--bb-gray-50);
+}
+
+.vendor-storefront-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.vendor-storefront-header,
+.vendor-storefront-products {
+  background: var(--bb-white);
+  border: 1.5px solid var(--bb-border);
+  border-radius: var(--radius-xl);
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+}
+
+.vendor-storefront-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.vendor-storefront-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.vendor-storefront-title-row h1 {
+  color: var(--bb-black);
+  font-size: 34px;
+  font-weight: 900;
+}
+
+.vendor-storefront-verified {
+  background: rgba(56, 161, 105, 0.12);
+  border-radius: 999px;
+  color: var(--bb-green);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 5px 9px;
+  text-transform: uppercase;
+}
+
+.vendor-storefront-description {
+  color: var(--bb-gray-700);
+  margin-top: 8px;
+}
+
+.vendor-storefront-rating {
+  align-items: center;
+  color: var(--bb-amber-dark);
+  display: flex;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.vendor-storefront-rating span {
+  color: var(--bb-gray-500);
+  font-size: 12px;
+}
+
+.vendor-storefront-meta {
+  border-top: 1px solid var(--bb-border);
+  color: var(--bb-gray-500);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 24px;
+  padding-top: 18px;
+  font-size: 13px;
+}
+
+.vendor-storefront-meta span {
+  align-items: center;
+  display: inline-flex;
+  gap: 6px;
+}
+
+.vendor-storefront-section-heading h2 {
+  color: var(--bb-black);
+  font-size: 25px;
+  font-weight: 900;
+}
+
+.vendor-storefront-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  margin-top: 20px;
+}
+
+.vendor-storefront-empty,
+.vendor-storefront-not-found {
+  color: var(--bb-gray-700);
+}
+
+.vendor-storefront-not-found {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 40px 0;
+}
+
+.vendor-storefront-not-found h1 {
+  color: var(--bb-black);
+  font-size: 28px;
+}
+
+@media (max-width: 768px) {
+  .vendor-storefront-header,
+  .vendor-storefront-products {
+    padding: 20px;
+  }
+
+  .vendor-storefront-heading {
+    flex-direction: column;
+  }
+
+  .vendor-storefront-title-row h1 {
+    font-size: 27px;
+  }
+}

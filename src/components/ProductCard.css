@@ -76,6 +76,38 @@
   font-weight: 600;
 }
 
+.product-brand {
+  color: var(--bb-gray-700);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.product-marketplace-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--bb-gray-500);
+  line-height: 1.2;
+}
+
+.product-location {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-stock {
+  font-weight: 700;
+}
+
+.product-stock.in-stock { color: var(--bb-green); }
+.product-stock.out-of-stock { color: var(--bb-red); }
+
+.marketplace-dot {
+  color: var(--bb-gray-300);
+}
+
 .product-name {
   font-size: 13px;
   font-weight: 700;
@@ -105,13 +137,22 @@
 }
 
 .product-price-row {
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .price-block {
   display: flex;
   align-items: baseline;
-  gap: 2px;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.price-label {
+  font-size: 10px;
+  color: var(--bb-gray-500);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .price-current {
@@ -143,6 +184,15 @@
   font-size: 11px;
   font-weight: 700;
   color: var(--bb-green);
+}
+
+.product-card.clickable {
+  cursor: pointer;
+}
+
+.product-card.clickable:focus-visible {
+  outline: 2px solid var(--bb-amber);
+  outline-offset: 2px;
 }
 
 .add-to-cart-btn {

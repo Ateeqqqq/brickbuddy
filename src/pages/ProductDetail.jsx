@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Heart, ShoppingCart, Star } from 'lucide-react';
-import './ProductCard.css';
+import { Link, useParams } from 'react-router-dom';
+import { ArrowLeft, Star, ShoppingCart } from 'lucide-react';
+import { products, vendors } from '../data/products';
+import VendorCard from '../components/VendorCard';
+import './ProductDetail.css';
 
-// SVG product illustrations since we can't use real images
 const ProductIllustration = ({ type }) => {
   const illustrations = {
     cement: (
@@ -155,120 +157,163 @@ const ProductIllustration = ({ type }) => {
       </svg>
     )
   };
+
   return illustrations[type] || illustrations.default;
 };
 
-export default function ProductCard({ product, compact = false, onClick = null }) {
-  const [wished, setWished] = useState(false);
-  const [added, setAdded] = useState(false);
+export default function ProductDetail() {
+  const { id } = useParams();
+  const product = products.find((item) => String(item.id) === String(id));
+  const [quoteVendor, setQuoteVendor] = useState(null);
+  const [quoteSubmitted, setQuoteSubmitted] = useState(false);
+
+  if (!product) {
+    return (
+      <div className="product-detail-page">
+        <div className="container product-detail-shell">
+          <div className="product-detail-not-found">
+            <h2>Product not found</h2>
+            <Link to="/shop" className="btn-primary">Back to Shop</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const vendorOffers = Array.isArray(product.vendorOffers) ? product.vendorOffers : [];
-  const vendorCount = vendorOffers.length || (Array.isArray(product.vendorOfferIds) ? product.vendorOfferIds.length : 0) || 1;
-  const displayPrice = vendorOffers.length
-    ? Math.min(...vendorOffers.map((offer) => Number(offer.price ?? product.price ?? 0)))
-    : Number(product.price ?? 0);
-  const displayOriginalPrice = vendorOffers.length
-    ? Math.min(...vendorOffers.map((offer) => Number(offer.originalPrice ?? offer.price ?? product.originalPrice ?? product.price ?? 0)))
-    : Number(product.originalPrice ?? 0);
-  const discount = displayOriginalPrice > 0 && displayPrice > 0
-    ? Math.round((1 - displayPrice / displayOriginalPrice) * 100)
-    : null;
-  const productLocation = product.location || vendorOffers[0]?.location || 'Hyderabad';
-  const inStock = product.inStock ?? vendorOffers.some((offer) => offer.inStock);
+  const vendorEntries = vendorOffers.map((offer) => {
+    const vendor = vendors.find((entry) => entry.id === offer.vendorId) || {
+      name: offer.supplier,
+      location: offer.location,
+      verified: true,
+      rating: product.rating,
+    };
+    return { ...vendor, offer };
+  });
 
-  const handleAddToCart = (event) => {
-    event?.stopPropagation();
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1800);
+  const lowestOffer = vendorOffers.length
+    ? vendorOffers.reduce((lowest, current) => Number(current.price ?? 0) < Number(lowest.price ?? 0) ? current : lowest, vendorOffers[0])
+    : null;
+
+  const openQuoteModal = (vendor, offer) => {
+    setQuoteVendor({ vendor, offer });
+    setQuoteSubmitted(false);
   };
 
-  const handleWishlist = (event) => {
-    event?.stopPropagation();
-    setWished(!wished);
+  const closeQuoteModal = () => {
+    setQuoteVendor(null);
+    setQuoteSubmitted(false);
   };
 
   return (
-    <div
-      className={`product-card ${compact ? 'compact' : ''} ${onClick ? 'clickable' : ''}`}
-      onClick={onClick}
-      onKeyDown={onClick ? (event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          onClick(event);
-        }
-      } : undefined}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
-    >
-      {/* Badge */}
-      {product.badge && (
-        <span className={`product-badge badge-${product.badge}`}>
-          {product.badge === 'sale' ? 'SALE' : 'NEW'}
-        </span>
-      )}
-      {!inStock && <span className="product-badge badge-oos">OUT OF STOCK</span>}
+    <div className="product-detail-page">
+      <div className="container product-detail-shell">
+        <Link to="/shop" className="back-to-shop-link">
+          <ArrowLeft size={16} /> Back to Shop
+        </Link>
 
-      {/* Wishlist */}
-      <button
-        className={`wishlist-btn ${wished ? 'active' : ''}`}
-        onClick={handleWishlist}
-        aria-label="Add to wishlist"
-      >
-        <Heart size={16} fill={wished ? '#E53E3E' : 'none'} color={wished ? '#E53E3E' : '#9CA3AF'} />
-      </button>
-
-      {/* Product image */}
-      <div className="product-img">
-        <ProductIllustration type={product.image} />
-      </div>
-
-      {/* Info */}
-      <div className="product-info">
-        <p className="product-supplier">
-          {vendorCount > 1 ? `${vendorCount} vendors offering` : product.supplier}
-        </p>
-        <h3 className="product-name">{product.name}</h3>
-
-        {product.brand && <p className="product-brand">{product.brand}</p>}
-
-        <div className="product-marketplace-meta">
-          <span className="product-location">{productLocation}</span>
-          <span className="marketplace-dot">•</span>
-          <span className={`product-stock ${inStock ? 'in-stock' : 'out-of-stock'}`}>
-            {inStock ? 'In stock' : 'Out of stock'}
-          </span>
-        </div>
-
-        <div className="product-rating">
-          <Star size={12} fill="#F5A800" color="#F5A800" />
-          <span className="rating-value">{product.rating}</span>
-          <span className="rating-count">({product.reviews})</span>
-        </div>
-
-        <div className="product-price-row">
-          <div className="price-block">
-            <span className="price-label">{vendorCount > 1 ? 'From' : 'Price'}</span>
-            <span className="price-current">
-              ₹{displayPrice.toLocaleString('en-IN')}
-            </span>
-            <span className="price-unit">/{product.unit}</span>
+        <div className="product-detail-card">
+          <div className="product-detail-visual">
+            <ProductIllustration type={product.image} />
           </div>
-          {displayOriginalPrice > 0 && (
-            <div className="price-original-block">
-              <span className="price-original">₹{displayOriginalPrice.toLocaleString('en-IN')}</span>
-              <span className="price-discount">{discount}% off</span>
+
+          <div className="product-detail-main">
+            <p className="product-detail-supplier">{product.supplier}</p>
+            <h1 className="product-detail-name">{product.name}</h1>
+
+            <div className="product-detail-rating">
+              <Star size={14} fill="#F5A800" color="#F5A800" />
+              <span>{product.rating}</span>
+              <span className="product-detail-reviews">({product.reviews} reviews)</span>
+            </div>
+
+            <div className="product-detail-price-row">
+              <span className="product-detail-price">₹{Number(lowestOffer ? lowestOffer.price : product.price).toLocaleString('en-IN')}</span>
+              <span className="product-detail-unit">/{product.unit}</span>
+              {product.originalPrice && (
+                <span className="product-detail-original">₹{Number(product.originalPrice).toLocaleString('en-IN')}</span>
+              )}
+            </div>
+
+            <p className="product-detail-description">{product.description}</p>
+
+            <div className="product-detail-meta">
+              <span>{vendorEntries.length} vendors offering</span>
+              <span>•</span>
+              <span>{product.location}</span>
+              <span>•</span>
+              <span>{product.inStock ? 'In stock' : 'Out of stock'}</span>
+            </div>
+
+            <button className="btn-primary product-detail-cart">
+              <ShoppingCart size={15} /> Add to Cart
+            </button>
+          </div>
+        </div>
+
+        <div className="vendor-offers-section">
+          <div className="vendor-offers-header">
+            <p className="section-label">Compare marketplace offers</p>
+            <h2>Available from {vendorEntries.length} vendors</h2>
+            <p className="vendor-offers-description">
+              Compare price, availability, and delivery details before selecting a vendor.
+            </p>
+          </div>
+
+          <div className="vendor-offers-list">
+            {vendorEntries.map(({ offer, ...vendor }) => (
+              <VendorCard
+                key={offer.id}
+                vendor={vendor}
+                offer={offer}
+                unit={product.unit}
+                actionLabel="Select Vendor"
+                onRequestQuote={() => openQuoteModal(vendor, offer)}
+              />
+            ))}
+          </div>
+
+          {quoteVendor && (
+            <div className="quote-modal-backdrop" onClick={closeQuoteModal}>
+              <div className="quote-modal" onClick={(event) => event.stopPropagation()}>
+                <div className="quote-modal-header">
+                  <div>
+                    <p className="section-label">Contact Vendor</p>
+                    <h2>Request a Quote</h2>
+                  </div>
+                  <button type="button" className="quote-modal-close" onClick={closeQuoteModal} aria-label="Close quote request">
+                    ×
+                  </button>
+                </div>
+
+                {quoteSubmitted ? (
+                  <div className="quote-success">
+                    <strong>Quote request submitted successfully.</strong>
+                    <button type="button" className="btn-primary" onClick={closeQuoteModal}>Done</button>
+                  </div>
+                ) : (
+                  <form
+                    className="quote-form"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      setQuoteSubmitted(true);
+                    }}
+                  >
+                    <div className="quote-context">
+                      <span><strong>Product:</strong> {product.name}</span>
+                      <span><strong>Vendor:</strong> {quoteVendor.vendor.name}</span>
+                    </div>
+                    <label>Name<input required type="text" name="name" /></label>
+                    <label>Phone<input required type="tel" name="phone" /></label>
+                    <label>Quantity ({product.unit})<input required min="1" type="number" name="quantity" /></label>
+                    <label>Message<textarea name="message" rows="3" placeholder="Add details about your requirement" /></label>
+                    <button type="submit" className="btn-primary quote-submit-button">Submit Request</button>
+                  </form>
+                )}
+              </div>
             </div>
           )}
         </div>
-
-        <button
-          className={`add-to-cart-btn ${added ? 'added' : ''} ${!inStock ? 'disabled' : ''}`}
-          onClick={handleAddToCart}
-          disabled={!inStock}
-        >
-          <ShoppingCart size={14} />
-          {added ? 'Added!' : !inStock ? 'Out of Stock' : 'Add to Cart'}
-        </button>
       </div>
     </div>
   );
