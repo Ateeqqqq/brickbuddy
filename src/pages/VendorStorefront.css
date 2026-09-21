@@ -115,16 +115,28 @@
 }
 
 @media (max-width: 768px) {
+  .vendor-storefront-page { padding: 20px 0 40px; }
+  .vendor-storefront-shell { gap: 16px; }
   .vendor-storefront-header,
   .vendor-storefront-products {
-    padding: 20px;
+    padding: 16px;
   }
 
   .vendor-storefront-heading {
     flex-direction: column;
+    gap: 12px;
   }
 
   .vendor-storefront-title-row h1 {
-    font-size: 27px;
+    font-size: 25px;
   }
+  .vendor-storefront-description { font-size: 13px; line-height: 1.5; }
+  .vendor-storefront-rating { align-self: flex-start; }
+  .vendor-storefront-meta {
+    gap: 10px 14px;
+    margin-top: 16px;
+    padding-top: 14px;
+  }
+  .vendor-storefront-section-heading h2 { font-size: 22px; }
+  .vendor-storefront-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 }

@@ -170,3 +170,17 @@
 .vendor-card-quote-button:hover {
   background: var(--bb-amber-dark);
 }
+
+@media (max-width: 768px) {
+  .vendor-card {
+    gap: 10px;
+    padding: 14px;
+  }
+  .vendor-card-header { gap: 8px; }
+  .vendor-card-name { font-size: 15px; }
+  .vendor-card-button,
+  .vendor-card-quote-button {
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+}

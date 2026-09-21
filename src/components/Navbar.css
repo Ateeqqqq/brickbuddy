@@ -504,5 +504,21 @@
 
 @media (max-width: 768px) {
   .navbar-main { display: none; }
-  .topbar-inner { gap: 10px; }
+  .topbar-inner {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-bottom: 12px;
+  }
+  .topbar-logo { flex: 1; min-width: 0; }
+  .logo-text { min-width: 0; }
+  .logo-tagline { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .search-bar {
+    flex: 0 0 100%;
+    order: 3;
+    width: 100%;
+  }
+  .search-bar input { min-height: 42px; }
+  .search-btn { min-width: 48px; }
+  .mobile-menu-btn { min-width: 44px; min-height: 44px; justify-content: center; }
+  .mobile-menu { padding: 76px 16px 24px; }
 }

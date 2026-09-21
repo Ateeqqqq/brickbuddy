@@ -266,9 +266,12 @@
 }
 
 @media (max-width: 768px) {
+  .product-detail-page { padding: 20px 0 40px; }
+  .product-detail-shell { gap: 16px; }
   .product-detail-card {
     grid-template-columns: 1fr;
-    padding: 20px;
+    gap: 18px;
+    padding: 16px;
   }
 
   .product-detail-name {
@@ -276,10 +279,60 @@
   }
 
   .product-detail-visual {
-    height: 220px;
+    height: 190px;
+    min-height: 190px;
+  }
+  .product-detail-visual svg { height: 150px; width: 150px; }
+  .product-detail-main { gap: 12px; }
+  .product-detail-supplier { font-size: 10px; }
+  .product-detail-name { font-size: 25px; }
+  .product-detail-rating { min-height: 28px; }
+  .product-detail-price { font-size: 28px; }
+  .product-detail-description { font-size: 13px; line-height: 1.6; }
+  .product-detail-meta { gap: 6px; font-size: 12px; }
+  .product-detail-cart {
+    min-height: 46px;
+    width: 100%;
+    justify-content: center;
   }
 
   .vendor-offers-section {
-    padding: 18px 20px;
+    padding: 16px;
   }
+  .vendor-offers-header h2 { font-size: 20px; }
+  .vendor-offers-description { font-size: 12px; line-height: 1.5; }
+  .vendor-offers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .vendor-offers-list .vendor-card {
+    width: 100%;
+    padding: 14px;
+  }
+  .quote-modal-backdrop {
+    align-items: flex-end;
+    padding: 10px;
+  }
+  .quote-modal {
+    border-radius: var(--radius-lg);
+    max-height: calc(100dvh - 20px);
+    padding: 18px;
+    width: 100%;
+  }
+  .quote-modal-header { margin-bottom: 14px; }
+  .quote-modal-header h2 { font-size: 21px; }
+  .quote-modal-close {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .quote-form { gap: 10px; }
+  .quote-form input,
+  .quote-form textarea {
+    font-size: 16px;
+    min-height: 44px;
+    padding: 10px 11px;
+  }
+  .quote-form textarea { min-height: 88px; }
+  .quote-submit-button { min-height: 46px; width: 100%; }
 }

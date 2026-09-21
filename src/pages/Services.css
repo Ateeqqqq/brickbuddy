@@ -313,6 +313,7 @@
 @media (max-width: 1000px) {
   .services-grid { grid-template-columns: repeat(2, 1fr); }
   .hiw-steps { grid-template-columns: repeat(2, 1fr); gap: 32px; }
+  .hiw-connector { display: none; }
   .hiw-step:not(:last-child)::after { display: none; }
   .pricing-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
   .pricing-card.highlighted { transform: none; }

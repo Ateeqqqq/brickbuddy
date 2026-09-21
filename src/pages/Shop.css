@@ -701,7 +701,8 @@
 }
 
 @media (max-width: 900px) {
-  .shop-layout { grid-template-columns: 1fr; }
+  .shop-layout { grid-template-columns: minmax(0, 1fr); min-width: 0; }
+  .products-area { min-width: 0; }
   .filter-sidebar { display: none; }
   .mobile-filter-btn { display: flex; }
   .products-grid.grid { grid-template-columns: repeat(2, 1fr); }
@@ -709,15 +710,33 @@
 }
 
 @media (max-width: 480px) {
-  .products-grid.grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .products-grid.grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .shop-hero { padding: 28px 0; }
+  .shop-search-bar { max-width: none; padding: 11px 14px; }
+  .shop-layout { gap: 18px; padding-top: 18px; padding-bottom: 36px; }
+  .products-toolbar { align-items: stretch; }
+  .toolbar-right { justify-content: space-between; width: 100%; }
+  .sort-select { min-width: 0; flex: 1; }
   .shop-title { font-size: 26px; }
   .category-discovery { padding: 12px; }
   .category-discovery-header { align-items: flex-start; flex-direction: column; gap: 6px; }
   .category-discovery-header h2 { font-size: 20px; }
-  .cat-pill { flex: 1 1 calc(50% - 8px); min-width: 0; }
+  .cat-pills {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .cat-pills::-webkit-scrollbar { display: none; }
+  .cat-pill { flex: 0 0 145px; min-width: 0; }
   .cat-pill-content { min-width: 0; }
   .cat-pill-content > span { overflow: hidden; text-overflow: ellipsis; }
-  .subcategory-pill { flex: 1 1 100%; }
+  .subcategory-pills {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .subcategory-pills::-webkit-scrollbar { display: none; }
+  .subcategory-pill { flex: 0 0 170px; }
   .category-landing { gap: 10px; padding: 14px; }
   .category-landing-icon { font-size: 24px; height: 44px; width: 44px; }
   .category-landing-content h2 { font-size: 22px; }

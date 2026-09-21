@@ -106,6 +106,13 @@ img { display: block; max-width: 100%; }
   padding: 0 24px;
 }
 
+@media (max-width: 480px) {
+  .container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
 .section-label {
   font-size: 12px;
   font-weight: 700;
