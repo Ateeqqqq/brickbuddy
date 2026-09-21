@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowRight, CheckCircle, FileText, MapPin, Search, Scale, ShieldCheck,
@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import VendorCard from '../components/VendorCard';
+import MarketplaceSearchSuggestions from '../components/MarketplaceSearchSuggestions';
+import heroBanner from '../../banner.png';
 import {
   categoryHierarchy,
   marketplaceLocations,
@@ -14,6 +16,7 @@ import {
   testimonials,
   vendors,
 } from '../data/products';
+import { flattenSearchResults, getVendorCatalog, searchMarketplace } from '../utils/marketplaceSearch';
 import './Home.css';
 
 const featuredProducts = products.slice(0, 6);
@@ -23,34 +26,80 @@ export default function Home() {
   const navigate = useNavigate();
   const [marketplaceSearch, setMarketplaceSearch] = useState('');
   const [marketplaceLocation, setMarketplaceLocation] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [activeSearchIndex, setActiveSearchIndex] = useState(-1);
+  const searchRef = useRef(null);
 
-  const vendorCatalog = useMemo(() => vendors.map((vendor) => {
-    const vendorProducts = products.filter((product) => (
-      product.vendorOffers?.some((offer) => offer.vendorId === vendor.id)
-    ));
-    return {
-      ...vendor,
-      productCount: vendorProducts.length,
-      categoryCount: new Set(vendorProducts.map((product) => product.category)).size,
-    };
-  }), []);
+  const vendorCatalog = useMemo(() => getVendorCatalog(), []);
 
   const featuredVendors = vendorCatalog.slice(0, 4);
   const localVendors = vendorCatalog.filter((vendor) => (
     vendor.location === (marketplaceLocation || marketplaceLocations[0])
   )).slice(0, 4);
+  const multipleSupplierProducts = products.filter((product) => (product.vendorOffers?.length || 0) > 1).slice(0, 4);
+  const nearbyProducts = products.filter((product) => (
+    product.vendorOffers?.some((offer) => offer.location === (marketplaceLocation || marketplaceLocations[0]))
+  )).slice(0, 4);
+
+  const searchResults = useMemo(() => searchMarketplace(marketplaceSearch), [marketplaceSearch]);
+
+  useEffect(() => {
+    const closeSearch = (event) => {
+      if (!searchRef.current?.contains(event.target)) setSearchOpen(false);
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') {
+        setSearchOpen(false);
+        setActiveSearchIndex(-1);
+      }
+    };
+    document.addEventListener('mousedown', closeSearch);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('mousedown', closeSearch);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, []);
 
   const browseMarketplace = (event) => {
     event.preventDefault();
+    const results = flattenSearchResults(searchResults);
+    if (marketplaceSearch.trim() && searchOpen && activeSearchIndex >= 0 && results[activeSearchIndex]) {
+      selectSearchResult(results[activeSearchIndex]);
+      return;
+    }
     const params = new URLSearchParams();
     if (marketplaceSearch.trim()) params.set('search', marketplaceSearch.trim());
     if (marketplaceLocation) params.set('location', marketplaceLocation);
+    setSearchOpen(false);
+    setActiveSearchIndex(-1);
     navigate(`/shop${params.toString() ? `?${params.toString()}` : ''}`);
+  };
+
+  const selectSearchResult = (result) => {
+    setMarketplaceSearch('');
+    setSearchOpen(false);
+    if (result.type === 'product') navigate(`/shop/${result.id}`);
+    else if (result.type === 'vendor') navigate(`/vendor/${result.id}`);
+    else navigate(`/shop?cat=${result.categoryId}${result.subcategoryId ? `&subcat=${result.subcategoryId}` : ''}`);
+  };
+
+  const handleSearchKeyDown = (event) => {
+    const results = flattenSearchResults(searchResults);
+    if (!searchOpen || marketplaceSearch.trim().length < 2 || !results.length) return;
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      setActiveSearchIndex((index) => (index + 1) % results.length);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      setActiveSearchIndex((index) => (index - 1 + results.length) % results.length);
+    }
   };
 
   return (
     <div className="home">
       <section className="marketplace-hero">
+        <img className="marketplace-hero-image" src={heroBanner} alt="" />
         <div className="container marketplace-hero-container">
           <div className="marketplace-hero-content">
             <p className="hero-eyebrow">India&apos;s Trusted Construction Marketplace</p>
@@ -61,13 +110,19 @@ export default function Home() {
             <p className="hero-sub">
               Discover construction materials, compare trusted suppliers, and source everything for your site in one marketplace.
             </p>
-            <form className="marketplace-search" onSubmit={browseMarketplace}>
+            <form className="marketplace-search" onSubmit={browseMarketplace} ref={searchRef}>
               <Search size={19} color="#6B6B6B" />
               <input
                 type="search"
                 placeholder="Search products, brands, or suppliers..."
                 value={marketplaceSearch}
-                onChange={(event) => setMarketplaceSearch(event.target.value)}
+                onChange={(event) => {
+                  setMarketplaceSearch(event.target.value);
+                  setSearchOpen(true);
+                  setActiveSearchIndex(-1);
+                }}
+                onFocus={() => setSearchOpen(true)}
+                onKeyDown={handleSearchKeyDown}
                 aria-label="Search products, brands, or suppliers"
               />
               <div className="marketplace-search-location">
@@ -84,6 +139,15 @@ export default function Home() {
                 </select>
               </div>
               <button type="submit" className="marketplace-search-button">Search</button>
+              {searchOpen && marketplaceSearch.trim().length >= 2 && (
+                <MarketplaceSearchSuggestions
+                  className="marketplace-search-results"
+                  results={searchResults}
+                  query={marketplaceSearch}
+                  activeIndex={activeSearchIndex}
+                  onSelect={selectSearchResult}
+                />
+              )}
             </form>
             <div className="hero-ctas">
               <Link to="/shop" className="btn-primary hero-cta-primary">
@@ -162,7 +226,36 @@ export default function Home() {
             <Link to="/shop" className="view-all-link">View All Products →</Link>
           </div>
           <div className="featured-products-grid">
-            {featuredProducts.map((product) => <ProductCard key={product.id} product={product} />)}
+            {featuredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} onClick={() => navigate(`/shop/${product.id}`)} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section-discovery-row">
+        <div className="container discovery-row-grid">
+          <div>
+            <div className="section-header">
+              <div><p className="section-label">Compare marketplace offers</p><h2 className="section-title">Multiple Supplier Products</h2></div>
+              <Link to="/shop" className="view-all-link">View All →</Link>
+            </div>
+            <div className="discovery-products-grid">
+              {multipleSupplierProducts.map((product) => (
+                <ProductCard key={product.id} product={product} onClick={() => navigate(`/shop/${product.id}`)} />
+              ))}
+            </div>
+          </div>
+          <div>
+            <div className="section-header">
+              <div><p className="section-label">Local availability</p><h2 className="section-title">Near You</h2></div>
+              <Link to={`/shop${marketplaceLocation ? `?location=${encodeURIComponent(marketplaceLocation)}` : ''}`} className="view-all-link">View All →</Link>
+            </div>
+            <div className="discovery-products-grid">
+              {nearbyProducts.map((product) => (
+                <ProductCard key={product.id} product={product} onClick={() => navigate(`/shop/${product.id}`)} />
+              ))}
+            </div>
           </div>
         </div>
       </section>

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, SlidersHorizontal, X, ChevronDown, ChevronUp, Grid3X3, List, MapPin } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+import VendorCard from '../components/VendorCard';
 import { products, categories, marketplaceLocations, vendors } from '../data/products';
 import './Shop.css';
 
@@ -178,6 +179,33 @@ export default function Shop() {
   const subcategoryProductCount = (subcategoryId) => products.filter(
     (product) => product.subcategoryId === subcategoryId
   ).length;
+  const categoryVendorCount = selectedCategory
+    ? new Set(
+      products
+        .filter((product) => product.category === selectedCategory.id
+          && (!selectedSubcategory || product.subcategoryId === selectedSubcategory))
+        .flatMap((product) => (product.vendorOffers || [])
+          .filter((offer) => !selectedLocations.length || selectedLocations.includes(offer.location))
+          .map((offer) => offer.vendorId))
+    ).size
+    : 0;
+  const categoryVendors = selectedCategory
+    ? vendors.map((vendor) => {
+      const matchingProducts = products.filter((product) => (
+        product.category === selectedCategory.id
+        && (!selectedSubcategory || product.subcategoryId === selectedSubcategory)
+        && product.vendorOffers?.some((offer) => (
+          offer.vendorId === vendor.id
+          && (!selectedLocations.length || selectedLocations.includes(offer.location))
+        ))
+      ));
+      return {
+        ...vendor,
+        productCount: matchingProducts.length,
+        categoryCount: matchingProducts.length ? 1 : 0,
+      };
+    }).filter((vendor) => vendor.productCount > 0).slice(0, 4)
+    : [];
 
   const FilterPanel = () => (
     <div className="filter-panel">
@@ -411,6 +439,43 @@ export default function Shop() {
                 </>
               )}
             </nav>
+          )}
+
+          {selectedCategory && (
+            <section className="category-landing" aria-labelledby="category-landing-title">
+              <div className="category-landing-icon">{selectedCategory.icon}</div>
+              <div className="category-landing-content">
+                <p className="section-label">Construction marketplace</p>
+                <h2 id="category-landing-title">
+                  {selectedSubcategoryData?.name || selectedCategory.name}
+                </h2>
+                <p>
+                  Explore {selectedSubcategoryData?.name || selectedCategory.name.toLowerCase()} from verified suppliers,
+                  with marketplace offers and local availability in one place.
+                </p>
+                <div className="category-landing-meta">
+                  <span>{selectedSubcategory ? subcategoryProductCount(selectedSubcategory) : filtered.length} products</span>
+                  <span>{categoryVendorCount} suppliers offering this category</span>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {selectedCategory && categoryVendors.length > 0 && (
+            <section className="category-suppliers" aria-labelledby="category-suppliers-title">
+              <div className="category-suppliers-header">
+                <div>
+                  <p className="section-label">Supplier discovery</p>
+                  <h2 id="category-suppliers-title">
+                    {selectedSubcategoryData?.name || selectedCategory.name} Suppliers
+                  </h2>
+                </div>
+                <span>{categoryVendors.length} relevant suppliers</span>
+              </div>
+              <div className="category-suppliers-grid">
+                {categoryVendors.map((vendor) => <VendorCard key={vendor.id} vendor={vendor} />)}
+              </div>
+            </section>
           )}
 
           {/* Toolbar */}

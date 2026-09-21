@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -10,16 +10,17 @@ import Services from './pages/Services';
 import About from './pages/About';
 
 function ScrollToTop() {
-  const { pathname } = window.location;
+  const { pathname, search } = useLocation();
   React.useEffect(() => {
     window.scrollTo(0, 0);
-  }, [pathname]);
+  }, [pathname, search]);
   return null;
 }
 
 export default function App() {
   return (
     <div className="app">
+      <ScrollToTop />
       <Navbar cartCount={3} />
       <Routes>
         <Route path="/" element={<Home />} />

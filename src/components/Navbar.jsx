@@ -1,55 +1,75 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, Search, MapPin, Truck, Menu, X, ChevronDown } from 'lucide-react';
-import { categories, marketplaceLocations, products, vendors } from '../data/products';
+import { ShoppingCart, User, Search, MapPin, Truck, Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
+import { categoryHierarchy, marketplaceLocations } from '../data/products';
+import { flattenSearchResults, searchMarketplace } from '../utils/marketplaceSearch';
+import MarketplaceSearchSuggestions from './MarketplaceSearchSuggestions';
 import './Navbar.css';
 
 export default function Navbar({ cartCount = 3 }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [mobileCategory, setMobileCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [activeSearchIndex, setActiveSearchIndex] = useState(-1);
+  const searchRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
   const selectedLocation = new URLSearchParams(location.search).get('location') || marketplaceLocations[0];
   const normalizedQuery = searchQuery.trim().toLowerCase();
 
-  const searchResults = useMemo(() => {
-    if (normalizedQuery.length < 2) return [];
-
-    const productResults = products
-      .filter((product) => {
-        const category = categories.find((entry) => entry.id === product.category);
-        const searchableText = [
-          product.name,
-          product.brand,
-          product.supplier,
-          product.location,
-          category?.name,
-          ...(product.vendorOffers || []).flatMap((offer) => [offer.location, offer.supplier]),
-        ].filter(Boolean).join(' ').toLowerCase();
-        return searchableText.includes(normalizedQuery);
-      })
-      .map((product) => ({ type: 'Product', id: product.id, name: product.name, meta: product.brand || product.category }));
-
-    const vendorResults = vendors
-      .filter((vendor) => [vendor.name, vendor.brand, vendor.location, vendor.city, vendor.state]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase()
-        .includes(normalizedQuery))
-      .map((vendor) => ({ type: 'Vendor', id: vendor.id, name: vendor.name, meta: vendor.location }));
-
-    return [...productResults, ...vendorResults].slice(0, 8);
-  }, [normalizedQuery]);
+  const searchResults = searchMarketplace(normalizedQuery);
 
   const handleSearchSubmit = (event) => {
     event.preventDefault();
+    const results = flattenSearchResults(searchResults);
+    if (normalizedQuery && searchOpen && activeSearchIndex >= 0 && results[activeSearchIndex]) {
+      selectSearchResult(results[activeSearchIndex]);
+      return;
+    }
     if (normalizedQuery) navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+    setSearchOpen(false);
   };
 
   const selectSearchResult = (result) => {
     setSearchQuery('');
-    navigate(result.type === 'Product' ? `/shop/${result.id}` : `/vendor/${result.id}`);
+    setSearchOpen(false);
+    setActiveSearchIndex(-1);
+    if (result.type === 'product') navigate(`/shop/${result.id}`);
+    else if (result.type === 'vendor') navigate(`/vendor/${result.id}`);
+    else navigate(`/shop?cat=${result.categoryId}${result.subcategoryId ? `&subcat=${result.subcategoryId}` : ''}`);
+  };
+
+  useEffect(() => {
+    const closeSearch = (event) => {
+      if (!searchRef.current?.contains(event.target)) setSearchOpen(false);
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') {
+        setSearchOpen(false);
+        setActiveSearchIndex(-1);
+      }
+    };
+    document.addEventListener('mousedown', closeSearch);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('mousedown', closeSearch);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, []);
+
+  const handleSearchKeyDown = (event) => {
+    const results = flattenSearchResults(searchResults);
+    if (!searchOpen || normalizedQuery.length < 2 || !results.length) return;
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      setActiveSearchIndex((index) => (index + 1) % results.length);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      setActiveSearchIndex((index) => (index - 1 + results.length) % results.length);
+    }
   };
 
   useEffect(() => {
@@ -58,7 +78,11 @@ export default function Navbar({ cartCount = 3 }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => { setMobileOpen(false); }, [location]);
+  useEffect(() => {
+    setMobileOpen(false);
+    setCategoriesOpen(false);
+    setMobileCategory(null);
+  }, [location]);
 
   const navLinks = [
     { to: '/', label: 'Home' },
@@ -108,7 +132,7 @@ export default function Navbar({ cartCount = 3 }) {
               </label>
             </div>
 
-            <form className="search-bar" onSubmit={handleSearchSubmit}>
+            <form className="search-bar" onSubmit={handleSearchSubmit} ref={searchRef}>
               <select className="search-cat">
                 <option>All Categories</option>
                 <option>Bricks & Blocks</option>
@@ -124,30 +148,25 @@ export default function Navbar({ cartCount = 3 }) {
                 type="text"
                 placeholder="Search materials, brands, products..."
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                onChange={e => {
+                  setSearchQuery(e.target.value);
+                  setSearchOpen(true);
+                setActiveSearchIndex(-1);
+                }}
+                onFocus={() => setSearchOpen(true)}
+                onKeyDown={handleSearchKeyDown}
               />
               <button type="submit" className="search-btn" aria-label="Search">
                 <Search size={18} />
               </button>
-              {normalizedQuery.length >= 2 && (
-                <div className="search-results" role="listbox">
-                  {searchResults.length > 0 ? searchResults.map((result) => (
-                    <button
-                      type="button"
-                      className="search-result"
-                      key={`${result.type}-${result.id}`}
-                      onClick={() => selectSearchResult(result)}
-                    >
-                      <span className="search-result-type">{result.type}</span>
-                      <span className="search-result-content">
-                        <strong>{result.name}</strong>
-                        <small>{result.meta}</small>
-                      </span>
-                    </button>
-                  )) : (
-                    <div className="search-no-results">No products or vendors found</div>
-                  )}
-                </div>
+              {searchOpen && normalizedQuery.length >= 2 && (
+                <MarketplaceSearchSuggestions
+                  className="search-results"
+                  results={searchResults}
+                  query={searchQuery}
+                  activeIndex={activeSearchIndex}
+                  onSelect={selectSearchResult}
+                />
               )}
             </form>
 
@@ -184,9 +203,49 @@ export default function Navbar({ cartCount = 3 }) {
       <nav className={`navbar-main ${isScrolled ? 'sticky' : ''}`}>
         <div className="container">
           <div className="mainnav-inner">
-            <div className="all-categories">
-              <Menu size={16} />
-              <span>All Categories</span>
+            <div
+              className="category-menu-wrapper"
+              onMouseEnter={() => setCategoriesOpen(true)}
+              onMouseLeave={() => setCategoriesOpen(false)}
+            >
+              <button
+                type="button"
+                className="all-categories"
+                onClick={() => setCategoriesOpen((open) => !open)}
+                aria-expanded={categoriesOpen}
+                aria-controls="desktop-category-menu"
+              >
+                <Menu size={16} />
+                <span>All Categories</span>
+                <ChevronDown size={14} />
+              </button>
+              {categoriesOpen && (
+                <div className="category-mega-menu" id="desktop-category-menu">
+                  {categoryHierarchy.map((category) => (
+                    <div className="mega-category" key={category.id}>
+                      <Link
+                        to={`/shop?cat=${category.id}`}
+                        className="mega-category-heading"
+                        onClick={() => setCategoriesOpen(false)}
+                      >
+                        <span className="mega-category-icon">{category.icon}</span>
+                        <span>{category.name}</span>
+                      </Link>
+                      <div className="mega-subcategories">
+                        {category.subcategories?.map((subcategory) => (
+                          <Link
+                            key={subcategory.id}
+                            to={`/shop?cat=${category.id}&subcat=${subcategory.id}`}
+                            onClick={() => setCategoriesOpen(false)}
+                          >
+                            {subcategory.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="nav-links">
@@ -224,6 +283,46 @@ export default function Navbar({ cartCount = 3 }) {
               {link.label}
             </Link>
           ))}
+          <div className="mobile-category-section">
+            <button
+              type="button"
+              className="mobile-category-toggle"
+              onClick={() => setMobileCategory(mobileCategory ? null : 'all')}
+              aria-expanded={Boolean(mobileCategory)}
+            >
+              <span>All Categories</span>
+              <ChevronDown size={17} className={mobileCategory ? 'expanded' : ''} />
+            </button>
+            {mobileCategory && (
+              <div className="mobile-category-list">
+                {categoryHierarchy.map((category) => (
+                  <div className="mobile-category-item" key={category.id}>
+                    <div className="mobile-category-row">
+                      <Link to={`/shop?cat=${category.id}`} className="mobile-category-link">
+                        <span>{category.icon}</span>{category.name}
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => setMobileCategory(mobileCategory === category.id ? 'all' : category.id)}
+                        aria-label={`Show ${category.name} subcategories`}
+                      >
+                        <ChevronRight size={16} className={mobileCategory === category.id ? 'expanded' : ''} />
+                      </button>
+                    </div>
+                    {mobileCategory === category.id && (
+                      <div className="mobile-subcategory-list">
+                        {category.subcategories?.map((subcategory) => (
+                          <Link key={subcategory.id} to={`/shop?cat=${category.id}&subcat=${subcategory.id}`}>
+                            {subcategory.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           <div className="mobile-actions">
             <Link to="#" className="mobile-link">📦 Track Order</Link>
             <Link to="#" className="mobile-link">🏪 Become a Supplier</Link>
