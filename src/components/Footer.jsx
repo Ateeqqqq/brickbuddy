@@ -32,8 +32,7 @@ export default function Footer() {
           <div className="footer-grid">
             <div className="footer-brand">
               <div className="footer-logo">
-                <span className="footer-logo-brick">Brick</span>
-                <span className="footer-logo-buddy">Buddy</span>
+                <img className="brand-logo" src="/assets/brickbuddy-logo.jpg" alt="BrickBuddy" />
               </div>
               <p className="footer-desc">India's trusted B2B marketplace for construction materials. Quality products. Verified suppliers. On-time delivery.</p>
               <div className="footer-socials">

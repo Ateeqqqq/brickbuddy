@@ -1,0 +1,35 @@
+.quotes-header { align-items: flex-end; display: flex; justify-content: space-between; gap: 20px; }
+.rfq-list, .quotation-grid { display: flex; flex-direction: column; gap: 16px; }
+.rfq-card, .rfq-summary, .rfq-items, .quotation-card { background: var(--bb-white); border: 1.5px solid var(--bb-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 20px; }
+.rfq-card-top, .quotation-top, .rfq-detail-heading { align-items: flex-start; display: flex; justify-content: space-between; gap: 16px; }
+.rfq-number { color: var(--bb-amber-dark); font-size: 11px; font-weight: 800; letter-spacing: .04em; }
+.rfq-card h2, .quotation-card h3 { color: var(--bb-black); font-size: 17px; margin-top: 4px; }
+.rfq-status { border-radius: 20px; font-size: 10px; font-weight: 800; padding: 5px 9px; text-transform: uppercase; white-space: nowrap; }
+.rfq-status.submitted, .rfq-status.pending { background: rgba(245, 168, 0, .14); color: var(--bb-amber-dark); }
+.rfq-status.quotation-received { background: rgba(49, 130, 206, .12); color: #2B6CB0; }
+.rfq-status.accepted { background: rgba(56, 161, 105, .12); color: var(--bb-green); }
+.rfq-status.cancelled, .rfq-status.rejected { background: rgba(229, 62, 62, .1); color: var(--bb-red); }
+.rfq-card-meta { color: var(--bb-gray-500); display: flex; flex-wrap: wrap; font-size: 11px; gap: 14px; margin-top: 15px; }
+.rfq-card-actions, .quotation-actions { display: flex; gap: 10px; margin-top: 18px; }
+.rfq-card-actions .btn-primary, .rfq-card-actions .btn-outline, .quotation-actions button { font-size: 11px; padding: 9px 13px; }
+.quotes-empty { align-items: center; display: flex; flex-direction: column; gap: 10px; justify-content: center; min-height: 280px; text-align: center; }
+.quotes-empty > svg { color: var(--bb-amber-dark); }
+.quotes-empty p, .quotes-waiting, .quotation-date, .quotation-notes { color: var(--bb-gray-500); font-size: 13px; }
+.rfq-summary-grid { display: grid; gap: 16px; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 18px; }
+.rfq-summary-grid small, .rfq-summary-grid strong { display: block; }
+.rfq-summary-grid small { color: var(--bb-gray-500); font-size: 11px; margin-bottom: 4px; }
+.rfq-summary-grid strong { color: var(--bb-black); font-size: 13px; }
+.rfq-items { display: flex; flex-direction: column; gap: 0; padding: 0 20px; }
+.rfq-item { align-items: center; border-bottom: 1px solid var(--bb-border); display: grid; gap: 14px; grid-template-columns: 1.5fr .7fr .9fr; padding: 14px 0; }
+.rfq-item:last-child { border-bottom: 0; }
+.rfq-item strong, .rfq-item small { display: block; }
+.rfq-item strong { font-size: 13px; }
+.rfq-item small, .rfq-item > span { color: var(--bb-gray-500); font-size: 11px; }
+.quotation-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.quotation-card { box-shadow: none; }
+.quotation-date { margin: 8px 0 16px; }
+.quotation-line, .quotation-total { display: flex; font-size: 12px; justify-content: space-between; padding: 8px 0; }
+.quotation-line { border-bottom: 1px solid var(--bb-border); color: var(--bb-gray-500); }
+.quotation-total { border-top: 1px solid var(--bb-border); color: var(--bb-black); font-size: 16px; font-weight: 800; margin-top: 8px; padding-top: 13px; }
+.quotation-notes { margin-top: 12px; }
+@media (max-width: 720px) { .quotes-header { align-items: flex-start; flex-direction: column; } .quotes-header .btn-primary { width: 100%; justify-content: center; } .rfq-card-top, .quotation-top { flex-direction: column; } .rfq-summary-grid, .quotation-grid { grid-template-columns: 1fr; } .rfq-item { align-items: flex-start; grid-template-columns: 1fr 1fr; } .rfq-item > span:last-child { grid-column: 1 / -1; } .rfq-card-actions, .quotation-actions { flex-direction: column; } .rfq-card-actions button, .rfq-card-actions a, .quotation-actions button { justify-content: center; width: 100%; } }

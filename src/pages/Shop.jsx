@@ -4,6 +4,7 @@ import { Search, SlidersHorizontal, X, ChevronDown, ChevronUp, Grid3X3, List, Ma
 import ProductCard from '../components/ProductCard';
 import VendorCard from '../components/VendorCard';
 import { products, categories, marketplaceLocations, vendors } from '../data/products';
+import { useVendor, getVendorMarketplaceProducts } from '../context/VendorContext';
 import './Shop.css';
 
 const priceRanges = [
@@ -40,6 +41,8 @@ function FilterAccordion({ title, children, defaultOpen = true }) {
 }
 
 export default function Shop() {
+  const { vendorProducts } = useVendor();
+  const marketplaceProducts = useMemo(() => [...products, ...getVendorMarketplaceProducts(vendorProducts)], [vendorProducts]);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialCat = searchParams.get('cat') || '';
@@ -114,7 +117,7 @@ export default function Shop() {
     + (priceRange ? 1 : 0) + (inStockOnly ? 1 : 0) + (onSaleOnly ? 1 : 0) + (minimumRating ? 1 : 0);
 
   const filtered = useMemo(() => {
-    let result = [...products];
+    let result = [...marketplaceProducts];
     if (search) result = result.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.supplier.toLowerCase().includes(search.toLowerCase()));
     if (selectedSubcategory) {
       result = result.filter(p => p.subcategoryId === selectedSubcategory);
@@ -170,7 +173,7 @@ export default function Shop() {
       default: break;
     }
     return result;
-  }, [search, selectedCats, selectedSubcategory, selectedBrands, selectedLocations, selectedVendors, priceRange, inStockOnly, onSaleOnly, minimumRating, sort]);
+  }, [marketplaceProducts, search, selectedCats, selectedSubcategory, selectedBrands, selectedLocations, selectedVendors, priceRange, inStockOnly, onSaleOnly, minimumRating, sort]);
 
   const selectedCategory = categories.find((category) => category.id === selectedCats[0]);
   const selectedSubcategoryData = selectedCategory?.subcategories?.find(

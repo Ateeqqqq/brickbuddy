@@ -17,12 +17,14 @@ import {
   vendors,
 } from '../data/products';
 import { flattenSearchResults, getVendorCatalog, searchMarketplace } from '../utils/marketplaceSearch';
+import { useVendor, getVendorMarketplaceProducts } from '../context/VendorContext';
 import './Home.css';
 
 const featuredProducts = products.slice(0, 6);
 const popularCategoryIds = ['cement', 'steel', 'tiles'];
 
 export default function Home() {
+  const { vendorProducts } = useVendor();
   const navigate = useNavigate();
   const [marketplaceSearch, setMarketplaceSearch] = useState('');
   const [marketplaceLocation, setMarketplaceLocation] = useState('');
@@ -41,7 +43,7 @@ export default function Home() {
     product.vendorOffers?.some((offer) => offer.location === (marketplaceLocation || marketplaceLocations[0]))
   )).slice(0, 4);
 
-  const searchResults = useMemo(() => searchMarketplace(marketplaceSearch), [marketplaceSearch]);
+  const searchResults = useMemo(() => searchMarketplace(marketplaceSearch, 5, getVendorMarketplaceProducts(vendorProducts)), [marketplaceSearch, vendorProducts]);
 
   useEffect(() => {
     const closeSearch = (event) => {

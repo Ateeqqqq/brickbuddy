@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Star, ShoppingCart } from 'lucide-react';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Heart, Star, ShoppingCart } from 'lucide-react';
 import { products, vendors } from '../data/products';
+import { useVendor, getVendorMarketplaceProducts } from '../context/VendorContext';
 import VendorCard from '../components/VendorCard';
+import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
+import { useAuth } from '../context/AuthContext';
+import { useOrders } from '../context/OrderContext';
+import { useReviews } from '../context/ReviewContext';
+import RFQForm from '../components/RFQForm';
 import './ProductDetail.css';
 
 const ProductIllustration = ({ type }) => {
@@ -163,9 +170,21 @@ const ProductIllustration = ({ type }) => {
 
 export default function ProductDetail() {
   const { id } = useParams();
-  const product = products.find((item) => String(item.id) === String(id));
+  const { addToCart } = useCart();
+  const { isWishlisted, toggleWishlist } = useWishlist();
+  const { isAuthenticated, currentUser } = useAuth();
+  const { orders } = useOrders();
+  const { getProductReviews, getProductRating, getReviewCount, addReview, hasReviewed } = useReviews();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { vendorProducts } = useVendor();
+  const product = [...products, ...getVendorMarketplaceProducts(vendorProducts)].find((item) => String(item.id) === String(id));
   const [quoteVendor, setQuoteVendor] = useState(null);
   const [quoteSubmitted, setQuoteSubmitted] = useState(false);
+  const [reviewFormOpen, setReviewFormOpen] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ rating: 0, title: '', comment: '' });
+  const [reviewErrors, setReviewErrors] = useState({});
+  const [rfqRequest, setRFQRequest] = useState(null);
 
   if (!product) {
     return (
@@ -194,6 +213,54 @@ export default function ProductDetail() {
   const lowestOffer = vendorOffers.length
     ? vendorOffers.reduce((lowest, current) => Number(current.price ?? 0) < Number(lowest.price ?? 0) ? current : lowest, vendorOffers[0])
     : null;
+  const productReviews = getProductReviews(product.id);
+  const reviewRating = getProductRating(product.id);
+  const purchasedOrder = orders.find((order) => order.items.some((item) => (
+    String(item.product?.id || item.productId || '') === String(product.id) || item.name === product.name
+  )));
+  const verifiedReviewExists = purchasedOrder && isAuthenticated
+    ? hasReviewed(purchasedOrder.id, product.id, currentUser.id)
+    : false;
+  const ownReview = isAuthenticated
+    ? productReviews.find((review) => review.userId === currentUser.id)
+    : null;
+
+  const openReviewForm = () => {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: `${location.pathname}#reviews` } });
+      return;
+    }
+    if (!verifiedReviewExists && !ownReview) setReviewFormOpen(true);
+  };
+
+  const openRFQForm = (vendor = null, offer = lowestOffer) => {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: `${location.pathname}?rfq=1` } });
+      return;
+    }
+    setRFQRequest({ vendor, offer });
+  };
+
+  const submitReview = (event) => {
+    event.preventDefault();
+    const errors = {};
+    if (!reviewForm.rating) errors.rating = 'Select a rating.';
+    if (!reviewForm.title.trim()) errors.title = 'Review title is required.';
+    if (reviewForm.comment.trim().length < 15) errors.comment = 'Comment must be at least 15 characters.';
+    setReviewErrors(errors);
+    if (Object.keys(errors).length) return;
+    addReview({
+      ...reviewForm,
+      productId: product.id,
+      userId: currentUser.id,
+      userName: currentUser.name,
+      verifiedPurchase: Boolean(purchasedOrder),
+      orderId: purchasedOrder?.id || null,
+    });
+    setReviewForm({ rating: 0, title: '', comment: '' });
+    setReviewErrors({});
+    setReviewFormOpen(false);
+  };
 
   const openQuoteModal = (vendor, offer) => {
     setQuoteVendor({ vendor, offer });
@@ -223,8 +290,8 @@ export default function ProductDetail() {
 
             <div className="product-detail-rating">
               <Star size={14} fill="#F5A800" color="#F5A800" />
-              <span>{product.rating}</span>
-              <span className="product-detail-reviews">({product.reviews} reviews)</span>
+              <span>{reviewRating ? reviewRating.toFixed(1) : product.rating}</span>
+              <span className="product-detail-reviews">({getReviewCount(product.id) || product.reviews} reviews)</span>
             </div>
 
             <div className="product-detail-price-row">
@@ -245,11 +312,54 @@ export default function ProductDetail() {
               <span>{product.inStock ? 'In stock' : 'Out of stock'}</span>
             </div>
 
-            <button className="btn-primary product-detail-cart">
+            <button
+              className="btn-primary product-detail-cart"
+              type="button"
+              onClick={() => addToCart(product, lowestOffer)}
+              disabled={!product.inStock}
+            >
               <ShoppingCart size={15} /> Add to Cart
+            </button>
+            <button type="button" className="btn-outline product-detail-rfq" onClick={() => openRFQForm()}>
+              Request Bulk Quote
+            </button>
+            <button
+              type="button"
+              className={`product-detail-wishlist ${isWishlisted(product.id) ? 'active' : ''}`}
+              onClick={() => toggleWishlist(product)}
+            >
+              <Heart size={16} fill={isWishlisted(product.id) ? '#E53E3E' : 'none'} />
+              {isWishlisted(product.id) ? 'Saved to Wishlist' : 'Save to Wishlist'}
             </button>
           </div>
         </div>
+
+        {rfqRequest && (
+          <div className="quote-modal-backdrop" onClick={() => setRFQRequest(null)}>
+            <div className="quote-modal" onClick={(event) => event.stopPropagation()}>
+              <div className="quote-modal-header">
+                <div><p className="section-label">Procurement request</p><h2>Request Bulk Quote</h2></div>
+                <button type="button" className="quote-modal-close" onClick={() => setRFQRequest(null)} aria-label="Close bulk quote form">×</button>
+              </div>
+              <RFQForm product={product} vendor={rfqRequest.vendor} offer={rfqRequest.offer} onCancel={() => setRFQRequest(null)} onSubmitted={(rfq) => navigate(`/quotes/${rfq.id}`)} />
+            </div>
+          </div>
+        )}
+
+        <section className="product-reviews-section" id="reviews">
+          <div className="product-reviews-header">
+            <div><p className="section-label">Customer feedback</p><h2>Product Reviews</h2></div>
+            <button type="button" className="btn-primary" onClick={openReviewForm} disabled={Boolean(ownReview || verifiedReviewExists)}>
+              {ownReview || verifiedReviewExists ? 'Reviewed' : 'Write a Review'}
+            </button>
+          </div>
+          <div className="review-summary">
+            <div className="review-average"><strong>{reviewRating ? reviewRating.toFixed(1) : product.rating}</strong><Stars rating={reviewRating || product.rating} /><span>{getReviewCount(product.id) || product.reviews} reviews</span></div>
+            <div className="rating-breakdown">{[5, 4, 3, 2, 1].map((rating) => { const count = productReviews.filter((review) => review.rating === rating).length; const percent = productReviews.length ? (count / productReviews.length) * 100 : 0; return <div className="rating-line" key={rating}><span>{rating} <Star size={12} fill="#F5A800" color="#F5A800" /></span><span className="rating-bar"><i style={{ width: `${percent}%` }} /></span><small>{count}</small></div>; })}</div>
+          </div>
+          {reviewFormOpen && <form className="review-form" onSubmit={submitReview}><h3>Write a Review</h3><div className="review-star-selector"><span>Your rating</span><div>{[1, 2, 3, 4, 5].map((rating) => <button type="button" key={rating} className={rating <= reviewForm.rating ? 'selected' : ''} onClick={() => setReviewForm((form) => ({ ...form, rating }))} aria-label={`${rating} stars`}><Star size={23} fill={rating <= reviewForm.rating ? '#F5A800' : 'none'} /></button>)}</div>{reviewErrors.rating && <span className="field-error">{reviewErrors.rating}</span>}</div><label>Review title<input value={reviewForm.title} onChange={(event) => setReviewForm((form) => ({ ...form, title: event.target.value }))} />{reviewErrors.title && <span className="field-error">{reviewErrors.title}</span>}</label><label>Your review<textarea rows="4" value={reviewForm.comment} onChange={(event) => setReviewForm((form) => ({ ...form, comment: event.target.value }))} />{reviewErrors.comment && <span className="field-error">{reviewErrors.comment}</span>}</label><div className="review-form-actions"><button type="submit" className="btn-primary">Submit Review</button><button type="button" className="btn-outline" onClick={() => setReviewFormOpen(false)}>Cancel</button></div></form>}
+          <div className="review-list">{productReviews.length ? productReviews.map((review) => <article className="product-review-card" key={review.id}><div className="review-card-top"><div><strong>{review.userName}</strong>{review.verifiedPurchase && <span className="verified-review">Verified Purchase</span>}</div><span className="review-date">{review.date}</span></div><Stars rating={review.rating} /><h3>{review.title}</h3><p>{review.comment}</p></article>) : <p className="reviews-empty">No reviews yet. Be the first to share your experience.</p>}</div>
+        </section>
 
         <div className="vendor-offers-section">
           <div className="vendor-offers-header">
@@ -317,4 +427,8 @@ export default function ProductDetail() {
       </div>
     </div>
   );
+}
+
+function Stars({ rating }) {
+  return <span className="review-stars" aria-label={`${rating} out of 5 stars`}>{[1, 2, 3, 4, 5].map((star) => <Star key={star} size={15} fill={star <= Math.round(rating) ? '#F5A800' : 'none'} color="#F5A800" />)}</span>;
 }

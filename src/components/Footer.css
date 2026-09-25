@@ -80,14 +80,14 @@
 .footer-brand {}
 
 .footer-logo {
-  font-family: var(--ff-display);
-  font-size: 26px;
-  font-weight: 900;
   margin-bottom: 14px;
 }
 
-.footer-logo-brick { color: var(--bb-white); }
-.footer-logo-buddy { color: var(--bb-amber); }
+.footer-logo .brand-logo {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
 
 .footer-desc {
   font-size: 13px;

@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, Search, MapPin, Truck, Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
+import { ShoppingCart, User, Search, MapPin, Truck, Heart, LogOut, Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { categoryHierarchy, marketplaceLocations } from '../data/products';
 import { flattenSearchResults, searchMarketplace } from '../utils/marketplaceSearch';
 import MarketplaceSearchSuggestions from './MarketplaceSearchSuggestions';
+import { useAuth } from '../context/AuthContext';
+import { useVendor, getVendorMarketplaceProducts } from '../context/VendorContext';
 import './Navbar.css';
 
-export default function Navbar({ cartCount = 3 }) {
+export default function Navbar({ cartCount = 0, wishlistCount = 0 }) {
+  const { currentUser, isAuthenticated, logout } = useAuth();
+  const { vendorProducts } = useVendor();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
@@ -20,7 +24,7 @@ export default function Navbar({ cartCount = 3 }) {
   const selectedLocation = new URLSearchParams(location.search).get('location') || marketplaceLocations[0];
   const normalizedQuery = searchQuery.trim().toLowerCase();
 
-  const searchResults = searchMarketplace(normalizedQuery);
+  const searchResults = searchMarketplace(normalizedQuery, 5, getVendorMarketplaceProducts(vendorProducts));
 
   const handleSearchSubmit = (event) => {
     event.preventDefault();
@@ -99,19 +103,7 @@ export default function Navbar({ cartCount = 3 }) {
           <div className="topbar-inner">
             <div className="topbar-logo">
               <Link to="/" className="logo-link">
-                <div className="logo-icon">
-                  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                    <rect x="0" y="14" width="12" height="7" rx="1" fill="#F5A800"/>
-                    <rect x="13" y="14" width="15" height="7" rx="1" fill="#F5A800"/>
-                    <rect x="0" y="0" width="7" height="13" rx="1" fill="#F5A800" opacity="0.8"/>
-                    <rect x="8" y="6" width="20" height="7" rx="1" fill="#F5A800" opacity="0.6"/>
-                  </svg>
-                </div>
-                <div className="logo-text">
-                  <span className="logo-brick">Brick</span>
-                  <span className="logo-buddy">Buddy</span>
-                  <span className="logo-tagline">Building Better Together</span>
-                </div>
+                <img className="brand-logo" src="/assets/brickbuddy-logo.jpg" alt="BrickBuddy" />
               </Link>
               <label className="location-chip">
                 <MapPin size={13} color="#F5A800" />
@@ -179,17 +171,37 @@ export default function Navbar({ cartCount = 3 }) {
                 <User size={20} />
                 <span>Supplier</span>
               </Link>
-              <Link to="/shop" className="action-item cart-action">
+              <Link to="/cart" className="action-item cart-action">
                 <div className="cart-icon-wrap">
                   <ShoppingCart size={20} />
                   {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
                 </div>
                 <span>Cart</span>
               </Link>
-              <Link to="#" className="action-item">
-                <User size={20} />
-                <span>Login</span>
+              <Link to="/wishlist" className="action-item wishlist-action">
+                <div className="wishlist-icon-wrap">
+                  <Heart size={20} />
+                  {wishlistCount > 0 && <span className="wishlist-badge">{wishlistCount}</span>}
+                </div>
+                <span>Wishlist</span>
               </Link>
+              {isAuthenticated ? (
+                <>
+                  <Link to={currentUser?.role === 'vendor' ? '/vendor/dashboard' : '/account'} className="action-item">
+                    <User size={20} />
+                    <span>{currentUser?.role === 'vendor' ? 'Vendor Dashboard' : 'Account'}</span>
+                  </Link>
+                  <button type="button" className="action-item action-button" onClick={logout} title={`Log out ${currentUser?.name || 'account'}`}>
+                    <LogOut size={20} />
+                    <span>Logout</span>
+                  </button>
+                </>
+              ) : (
+                <Link to="/login" className="action-item">
+                  <User size={20} />
+                  <span>Login / Register</span>
+                </Link>
+              )}
             </div>
 
             <button className="mobile-menu-btn" onClick={() => setMobileOpen(!mobileOpen)}>
@@ -326,7 +338,15 @@ export default function Navbar({ cartCount = 3 }) {
           <div className="mobile-actions">
             <Link to="#" className="mobile-link">📦 Track Order</Link>
             <Link to="#" className="mobile-link">🏪 Become a Supplier</Link>
-            <Link to="#" className="mobile-link">👤 Login / Sign Up</Link>
+            <Link to="/wishlist" className="mobile-link">♡ Wishlist</Link>
+            {isAuthenticated ? (
+              <>
+                <Link to={currentUser?.role === 'vendor' ? '/vendor/dashboard' : '/account'} className="mobile-link">👤 {currentUser?.role === 'vendor' ? 'Vendor Dashboard' : 'Account'}</Link>
+                <button type="button" className="mobile-link mobile-action-button" onClick={logout}>↪ Logout</button>
+              </>
+            ) : (
+              <Link to="/login" className="mobile-link">👤 Login / Sign Up</Link>
+            )}
           </div>
         </div>
       )}

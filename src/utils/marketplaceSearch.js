@@ -15,11 +15,12 @@ export function getVendorCatalog() {
   });
 }
 
-export function searchMarketplace(query, limit = 5) {
+export function searchMarketplace(query, limit = 5, additionalProducts = []) {
   const normalizedQuery = text(query).trim();
   if (normalizedQuery.length < 2) return { products: [], vendors: [], categories: [] };
+  const marketplaceProducts = [...products, ...additionalProducts];
 
-  const matchingProducts = products
+  const matchingProducts = marketplaceProducts
     .filter((product) => {
       const category = categoryHierarchy.find((entry) => entry.id === product.category);
       const subcategory = category?.subcategories?.find((entry) => entry.id === product.subcategoryId);

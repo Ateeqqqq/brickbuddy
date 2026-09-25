@@ -1,0 +1,81 @@
+.customer-page { background: var(--bb-gray-50); min-height: 650px; padding: 40px 0 72px; }
+.customer-page .customer-layout { align-items: flex-start; display: flex; gap: 28px; }
+.customer-page .customer-content { display: flex; flex: 1; flex-direction: column; gap: 24px; min-width: 0; }
+.customer-page-header h1 { color: var(--bb-black); font-size: 32px; font-weight: 900; }
+.customer-page-header p:last-child { color: var(--bb-gray-500); font-size: 14px; }
+.customer-panel { background: var(--bb-white); border: 1.5px solid var(--bb-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 22px; }
+.customer-panel h2 { color: var(--bb-black); font-size: 20px; margin-bottom: 16px; }
+.filter-tabs { display: flex; gap: 8px; margin-bottom: 18px; overflow-x: auto; }
+.filter-tab { background: var(--bb-gray-50); border: 1px solid var(--bb-border); border-radius: 20px; color: var(--bb-gray-500); cursor: pointer; font: 700 12px var(--ff-body); padding: 8px 14px; white-space: nowrap; }
+.filter-tab.active, .filter-tab:hover { background: var(--bb-amber); border-color: var(--bb-amber); color: var(--bb-black); }
+.orders-table { display: flex; flex-direction: column; }
+.orders-table-header, .customer-order-card { align-items: center; display: grid; gap: 16px; grid-template-columns: 1.3fr 1fr 0.9fr 0.8fr auto; }
+.orders-table-header { color: var(--bb-gray-500); font-size: 11px; font-weight: 700; padding: 0 12px 10px; text-transform: uppercase; }
+.customer-order-card { border-top: 1px solid var(--bb-border); padding: 16px 12px; }
+.customer-order-card strong { color: var(--bb-black); font-size: 13px; }
+.customer-order-card small { color: var(--bb-gray-500); display: block; font-size: 11px; margin-top: 3px; }
+.profile-form { display: grid; gap: 18px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.profile-field { display: flex; flex-direction: column; gap: 6px; }
+.profile-field label { color: var(--bb-gray-700); font-size: 12px; font-weight: 700; }
+.profile-field input { border: 1.5px solid var(--bb-border); border-radius: var(--radius-md); font: 14px var(--ff-body); min-height: 44px; padding: 10px 12px; }
+.profile-field input:focus { border-color: var(--bb-amber); outline: none; }
+.profile-actions { display: flex; gap: 10px; grid-column: 1 / -1; }
+.review-item { border-top: 1px solid var(--bb-border); padding: 16px 0; }
+.review-item:first-child { border-top: 0; padding-top: 0; }
+.review-meta { align-items: center; display: flex; justify-content: space-between; }
+.review-meta strong { font-size: 14px; }
+.review-stars { color: var(--bb-amber); font-size: 14px; letter-spacing: 2px; }
+.review-item p { color: var(--bb-gray-500); font-size: 13px; margin-top: 6px; }
+.order-detail-grid { display: grid; gap: 18px; grid-template-columns: 1.3fr 0.7fr; }
+.order-detail-items { display: flex; flex-direction: column; gap: 12px; }
+.detail-item { align-items: center; border-bottom: 1px solid var(--bb-border); display: flex; justify-content: space-between; padding-bottom: 12px; }
+.detail-item strong { font-size: 13px; }
+.detail-item small { color: var(--bb-gray-500); display: block; font-size: 11px; margin-top: 3px; }
+.order-summary-list { display: flex; flex-direction: column; gap: 10px; }
+.order-summary-line { display: flex; font-size: 13px; justify-content: space-between; }
+.order-summary-line.total { border-top: 1px solid var(--bb-border); font-size: 16px; font-weight: 800; margin-top: 6px; padding-top: 12px; }
+.timeline { display: flex; flex-direction: column; gap: 18px; }
+.timeline-step { align-items: flex-start; display: flex; gap: 10px; }
+.timeline-dot { background: var(--bb-amber); border-radius: 50%; flex: 0 0 10px; height: 10px; margin-top: 5px; }
+.timeline-step.pending .timeline-dot { background: var(--bb-border); }
+.timeline-step strong { display: block; font-size: 13px; }
+.timeline-step small { color: var(--bb-gray-500); font-size: 11px; }
+.customer-panel > p { color: var(--bb-gray-500); font-size: 13px; }
+.review-item h3 { color: var(--bb-black); font-size: 14px; margin-top: 7px; }
+.review-meta > div { align-items: center; display: flex; gap: 9px; }
+.customer-review-footer { align-items: center; display: flex; gap: 12px; margin-top: 12px; }
+.unverified-review { color: var(--bb-gray-500); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.review-delete-button { background: transparent; border: 0; color: var(--bb-red); cursor: pointer; font: 700 11px var(--ff-body); }
+.empty-review-state { align-items: center; display: flex; flex-direction: column; gap: 14px; padding: 30px 0 10px; }
+.order-item-review { align-items: flex-end; display: flex; flex-direction: column; gap: 7px; }
+.reviewed-label { color: var(--bb-green); font-size: 11px; font-weight: 800; }
+.address-page-header { align-items: flex-end; display: flex; justify-content: space-between; gap: 20px; }
+.address-form { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.address-field-addressLine1, .address-field-addressLine2 { grid-column: span 2; }
+.address-form select { background: var(--bb-white); border: 1.5px solid var(--bb-border); border-radius: var(--radius-md); font: 14px var(--ff-body); min-height: 44px; padding: 10px 12px; }
+.address-form input[aria-invalid="true"] { border-color: var(--bb-red); }
+.address-default-check { align-items: center; color: var(--bb-gray-700); display: flex; font-size: 12px; gap: 7px; grid-column: 1 / -1; }
+.address-default-check input { accent-color: var(--bb-amber); height: 15px; width: 15px; }
+.address-grid { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.address-card { background: var(--bb-white); border: 1.5px solid var(--bb-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 18px; }
+.address-card.is-default { border-color: var(--bb-amber); }
+.address-card-header, .address-type, .address-card-actions { align-items: center; display: flex; }
+.address-card-header { justify-content: space-between; }
+.address-type { color: var(--bb-black); gap: 8px; }
+.address-type-icon { align-items: center; background: rgba(245, 168, 0, 0.14); border-radius: var(--radius-md); color: var(--bb-amber-dark); display: flex; height: 34px; justify-content: center; width: 34px; }
+.default-badge { background: rgba(56, 161, 105, 0.12); border-radius: 20px; color: var(--bb-green); font-size: 10px; font-weight: 800; padding: 4px 8px; text-transform: uppercase; }
+.address-card-body { border-bottom: 1px solid var(--bb-border); min-height: 136px; padding: 16px 0 12px; }
+.address-card-body strong { color: var(--bb-black); font-size: 14px; }
+.address-card-body p { color: var(--bb-gray-500); font-size: 12px; line-height: 1.6; }
+.address-card-actions { flex-wrap: wrap; gap: 14px; padding-top: 14px; }
+.address-card-actions button { align-items: center; background: none; border: 0; color: var(--bb-gray-700); cursor: pointer; display: inline-flex; font: 700 11px var(--ff-body); gap: 5px; padding: 0; }
+.address-card-actions button:hover { color: var(--bb-amber-dark); }
+.address-card-actions .delete-address:hover { color: var(--bb-red); }
+.address-card-actions .set-default { color: var(--bb-amber-dark); margin-left: auto; }
+.empty-addresses { align-items: center; display: flex; flex-direction: column; gap: 10px; justify-content: center; min-height: 260px; text-align: center; }
+.empty-addresses > svg { color: var(--bb-amber-dark); }
+.empty-addresses p { margin-bottom: 6px; }
+.default-address-summary p { align-items: center; color: var(--bb-gray-500); display: flex; font-size: 13px; gap: 7px; }
+.default-address-summary p svg { color: var(--bb-amber-dark); flex: 0 0 auto; }
+@media (max-width: 1000px) { .customer-page .customer-layout { flex-direction: column; } .customer-page .customer-sidebar { width: 100%; } }
+@media (max-width: 720px) { .orders-table-header { display: none; } .customer-order-card { grid-template-columns: 1fr auto; } .customer-order-card .order-status { grid-column: 1; } .customer-order-card .btn-outline { grid-column: 2; grid-row: 2; } .profile-form, .order-detail-grid, .address-grid, .address-form { grid-template-columns: 1fr; } .address-field-addressLine1, .address-field-addressLine2, .address-default-check { grid-column: auto; } .address-page-header { align-items: flex-start; flex-direction: column; } }

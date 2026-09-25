@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Heart, ShoppingCart, Star } from 'lucide-react';
+import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import './ProductCard.css';
 
 // SVG product illustrations since we can't use real images
-const ProductIllustration = ({ type }) => {
+export const ProductIllustration = ({ type }) => {
   const illustrations = {
     cement: (
       <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" width="80" height="80">
@@ -159,8 +161,8 @@ const ProductIllustration = ({ type }) => {
 };
 
 export default function ProductCard({ product, compact = false, onClick = null }) {
-  const [wished, setWished] = useState(false);
-  const [added, setAdded] = useState(false);
+  const { addToCart, items } = useCart();
+  const { isWishlisted, toggleWishlist } = useWishlist();
 
   const vendorOffers = Array.isArray(product.vendorOffers) ? product.vendorOffers : [];
   const vendorCount = vendorOffers.length || (Array.isArray(product.vendorOfferIds) ? product.vendorOfferIds.length : 0) || 1;
@@ -175,16 +177,21 @@ export default function ProductCard({ product, compact = false, onClick = null }
     : null;
   const productLocation = product.location || vendorOffers[0]?.location || 'Hyderabad';
   const inStock = product.inStock ?? vendorOffers.some((offer) => offer.inStock);
+  const selectedOffer = vendorOffers.reduce((lowest, offer) => (
+    Number(offer.price ?? 0) < Number(lowest?.price ?? Number.POSITIVE_INFINITY) ? offer : lowest
+  ), vendorOffers[0] || null);
+  const cartVendorId = selectedOffer?.vendorId || product.vendorId || 'default';
+  const added = items.some((item) => item.key === `${product.id}-${cartVendorId}`);
+  const wished = isWishlisted(product.id);
 
   const handleAddToCart = (event) => {
     event?.stopPropagation();
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1800);
+    addToCart(product, selectedOffer);
   };
 
   const handleWishlist = (event) => {
     event?.stopPropagation();
-    setWished(!wished);
+    toggleWishlist(product);
   };
 
   return (
@@ -212,7 +219,7 @@ export default function ProductCard({ product, compact = false, onClick = null }
       <button
         className={`wishlist-btn ${wished ? 'active' : ''}`}
         onClick={handleWishlist}
-        aria-label="Add to wishlist"
+        aria-label={wished ? 'Remove from wishlist' : 'Add to wishlist'}
       >
         <Heart size={16} fill={wished ? '#E53E3E' : 'none'} color={wished ? '#E53E3E' : '#9CA3AF'} />
       </button>
